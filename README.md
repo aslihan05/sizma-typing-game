@@ -121,6 +121,10 @@ Birkaç seçim bilinçli ve oyunun tamamını şekillendiriyor:
 - **Çok oyunculu mod** — backend, eşleştirme ve hile önleme gerektirir; ayrı bir proje.
 - **Mobil dokunmatik oynanış** — 10 parmak öğreten bir oyunu dokunmatikte oynatmak amacı boşa çıkarır.
 
+## Lisans
+
+[MIT](LICENSE) — © 2026 Aslıhan Erturhan
+
 ## Durum
 
 Oynanabilir. Sıradaki işler: denge sayılarının gerçek oynanışla doğrulanması,
