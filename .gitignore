@@ -1,0 +1,15 @@
+# Claude Code yerel ayarları (kişiye özel izinler)
+.claude/settings.local.json
+
+# İç tasarım/plan dökümanı — paylaşılmıyor
+PLAN.md
+
+# İşletim sistemi
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Editör
+.vscode/
+.idea/
+*.swp

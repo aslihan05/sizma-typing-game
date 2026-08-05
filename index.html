@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SIZMA — Hacker Yazma Oyunu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <canvas id="matrixRain"></canvas>
+
+  <main class="app">
+  <section class="terminal" id="terminal">
+
+    <div class="flash-overlay" id="flashOverlay"></div>
+
+    <header class="term-header">
+      <span class="term-title">root@hedef:~#</span>
+      <span style="display:flex;align-items:center;gap:8px;">
+        <button class="pause-btn" id="muteBtn" title="Sesi kapat">🔊</button>
+        <button class="pause-btn hidden" id="finishBtn" title="Bitir ve raporu gör">■ bitir</button>
+        <button class="pause-btn hidden" id="pauseBtn" title="Duraklat (Esc)">⏸</button>
+        <span class="term-clock" id="clock">00:00</span>
+      </span>
+    </header>
+
+    <div class="playfield" id="playfield">
+
+      <!-- Boss can barı -->
+      <div class="boss-bar hidden" id="bossBar">
+        <span class="boss-name">⚠ GÜVENLİK DUVARI</span>
+        <div class="boss-hp-track"><div class="boss-hp-fill" id="bossHpFill"></div></div>
+      </div>
+
+      <!-- Duraklatma ekranı -->
+      <div class="overlay hidden" id="pauseOverlay">
+        <h2 class="pause-title">⏸ DURAKLATILDI</h2>
+        <p class="pause-hint">devam etmek için Esc tuşuna bas</p>
+        <div class="menu-btns">
+          <button class="diff-btn" id="resumeBtn">devam et</button>
+          <button class="link-btn" id="quitBtn">menüye dön</button>
+        </div>
+      </div>
+
+      <!-- Başlangıç menüsü -->
+      <div class="overlay" id="menu">
+        <h1 class="game-title">SIZMA</h1>
+        <p class="game-sub" id="modeSub">komutu bul, yaz, süreye karşı yarış</p>
+
+        <!-- Seviye çubuğu: XP = ömür boyu doğru yazılan karakter -->
+        <div class="level-box" id="levelBox"></div>
+
+        <p class="menu-label">mod</p>
+        <div class="menu-btns">
+          <button class="mode-btn active" data-mode="sizma">⏱ Sızma</button>
+          <button class="mode-btn" data-mode="pratik">🎯 Pratik</button>
+          <button class="mode-btn" data-mode="gunluk">📅 Günlük</button>
+          <button class="mode-btn" data-mode="drill">✋ Parmak</button>
+        </div>
+
+        <!-- Parmak antrenmanı hedefi (sadece ✋ Parmak modunda görünür) -->
+        <div class="hidden" id="drillTargetRow">
+          <p class="menu-label">ne çalışalım?</p>
+          <select class="layout-select" id="drillTarget"></select>
+        </div>
+
+        <p class="menu-label" id="diffLabel">zorluk seç</p>
+        <div class="menu-btns">
+          <button class="diff-btn" data-diff="kolay">Kolay</button>
+          <button class="diff-btn" data-diff="orta">Orta</button>
+          <button class="diff-btn" data-diff="zor">Zor</button>
+        </div>
+        <p class="menu-best" id="menuBestRow">en iyi skor: <span id="menuBest">0</span></p>
+        <p class="adapt-hint" id="adaptHint"></p>
+        <button class="link-btn" id="statsBtn">📊 istatistiklerim</button>
+        <button class="link-btn" id="tutorialBtn">❓ nasıl oynanır</button>
+        <button class="link-btn" id="settingsBtn">⚙️ ayarlar</button>
+      </div>
+
+      <!-- İstatistik paneli (tüm oyunların birikimi) -->
+      <div class="overlay hidden" id="statsPanel">
+        <h2 class="over-title">analiz</h2>
+        <div class="stats-body" id="statsBody"></div>
+        <h3 class="stat-group-title" style="margin-top:20px;">🏆 En İyi 10 Maç</h3>
+        <div class="stats-body" id="leaderboardBody" style="margin-top: 10px;"></div>
+        <div class="menu-btns" style="margin-top:20px;">
+          <button class="diff-btn" id="statsCloseBtn">geri</button>
+          <button class="link-btn" id="exportBtn">💾 dışa aktar</button>
+          <button class="link-btn danger" id="statsResetBtn">sıfırla</button>
+        </div>
+      </div>
+
+      <!-- Öğretici -->
+      <div class="overlay hidden" id="tutorialOverlay">
+        <div class="tut-step" id="tutStep"></div>
+        <div class="tut-dots" id="tutDots"></div>
+        <div class="tut-nav">
+          <button class="diff-btn" id="tutPrev">← geri</button>
+          <button class="diff-btn" id="tutNext">ileri →</button>
+        </div>
+      </div>
+
+      <!-- Ayarlar paneli -->
+      <div class="overlay hidden" id="settingsPanel">
+        <h2 class="over-title">ayarlar</h2>
+        <div class="stats-body" id="settingsBody">
+          
+          <div class="stat-group">
+            <span class="stat-label">Tema</span>
+            <div class="menu-btns" id="themeGroup">
+              <button class="diff-btn active" data-theme="">Hacker</button>
+              <button class="diff-btn" data-theme="theme-synthwave">Synthwave</button>
+              <button class="diff-btn" data-theme="theme-cyberpunk">Cyberpunk</button>
+              <button class="diff-btn" data-theme="theme-stealth">Karanlık</button>
+            </div>
+          </div>
+
+          <div class="stat-group" style="margin-top: 15px;">
+            <span class="stat-label">Yazı Boyutu</span>
+            <div class="menu-btns" id="fontSizeGroup">
+              <button class="diff-btn" data-size="0.85">Küçük</button>
+              <button class="diff-btn active" data-size="1">Normal</button>
+              <button class="diff-btn" data-size="1.2">Büyük</button>
+            </div>
+          </div>
+          
+          <div class="stat-group" style="margin-top: 15px;">
+            <span class="stat-label">Tam Ekran</span>
+            <div class="menu-btns">
+              <button class="diff-btn" id="fullscreenToggleBtn">Aç / Kapat</button>
+            </div>
+          </div>
+
+        </div>
+        <div class="menu-btns">
+          <button class="diff-btn" id="settingsCloseBtn">geri</button>
+        </div>
+      </div>
+
+      <!-- Oyun sonu ekranı -->
+      <div class="overlay hidden" id="gameover">
+        <h2 class="over-title" id="overTitle">süre doldu</h2>
+        <p class="over-score" id="overScoreRow">skor: <span id="finalScore">0</span></p>
+        <p class="over-best" id="overBestRow">en iyi: <span id="bestScore">0</span></p>
+        <div class="level-box" id="overLevel"></div>
+        <div class="stats-body" id="overStats"></div>
+        <div class="menu-btns" style="margin-bottom: 10px;">
+          <button class="diff-btn" id="shareScoreBtn">🔗 skoru kopyala</button>
+        </div>
+        <div class="menu-btns">
+          <button class="diff-btn" id="restartBtn">tekrar oyna</button>
+          <button class="link-btn" id="overStatsBtn">📊 detaylı analiz</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Yazma göstergesi -->
+    <div class="term-input" id="termInput">
+      <span class="input-prompt">&gt;_</span>
+      <span class="input-text" id="inputText"></span>
+    </div>
+
+    <footer class="term-status">
+      <span id="score">skor: 0</span>
+      <span id="status">hazır</span>
+    </footer>
+
+  </section>
+
+  <!-- Ekran Klavyesi -->
+  <section class="keyboard" id="keyboardSection">
+    <div class="kbd-header">
+      <span class="kbd-label">10 parmak rehberi</span>
+      <select class="layout-select" id="layoutSelect">
+        <option value="TR-Q">TR-Q</option>
+        <option value="TR-F">TR-F</option>
+        <option value="EN">EN</option>
+      </select>
+    </div>
+  </section>
+
+</main>
+
+<!-- Betikler: klavye → analiz → alıştırma → denge → ses → oyun -->
+<script src="js/keyboard.js"></script>
+<script src="js/stats.js"></script>
+<script src="js/drills.js"></script>
+<script src="js/balance.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/badges.js"></script>
+<script src="js/settings.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

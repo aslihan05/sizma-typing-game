@@ -1,0 +1,39 @@
+// === Denge Sabitleri (Faz 6) ===
+// BALANCE: süre ekonomisi, ceza/ödül, boss, düşman zamanlaması
+// DIFFICULTIES: zorluk seviyeleri (hız, gürültü, komut tavanı, hedef CPS)
+
+const BALANCE = {
+  startTime: 60,
+
+  timeRewardBase: 0.3, // Daha düşük sabit ödül (eskiden 0.6 idi)
+  rewardFullChars: 12,
+  rewardLongFactor: 0.6,
+  maxTimeBonus: 30,
+  missedPenalty: 1.5,
+  decoyPenalty: 3,
+  bombPenalty: 4,
+  bombTimer: 8,
+  bossInterval: 45,
+  bossHp: 5,
+  bossTimeBonus: 10,
+  bossScoreBonus: 500,
+  bossSpeedMult: 1.2,
+  bossDecoyRate: 0.18,
+  bossCmdBonus: 2,
+  bossNoiseMult: 0.5,
+  splitThreshold: 0.45,
+  weakBias: 0.5,
+  decoyDelay: 10,
+  splitterDelay: 22,
+  mutatingDelay: 34,
+  bombDelay: 30,
+};
+
+// Süre ödülü formülü: timeRewardBase + (etkinUzunluk / targetCps)
+// Sürenin kolayca artmasını engellemek için targetCps (Hedef Harf/Saniye) değerleri artırıldı.
+const DIFFICULTIES = {
+  kolay: { speed: 13, noiseCount: 2, lineHeight: 34, scoreMult: 1,   noiseOnly: 0.50, startTime: 80, maxCmds: 2, targetCps: 2.2, enemyMult: 3 },
+  orta:  { speed: 24, noiseCount: 4, lineHeight: 28, scoreMult: 1.5, noiseOnly: 0.60, startTime: 60, maxCmds: 3, targetCps: 3.5, enemyMult: 1 },
+  zor:   { speed: 34, noiseCount: 6, lineHeight: 22, scoreMult: 2,   noiseOnly: 0.62, startTime: 50, maxCmds: 5, targetCps: 5.0, enemyMult: 0.6 },
+};
+
