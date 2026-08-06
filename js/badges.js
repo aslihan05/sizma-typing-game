@@ -1,153 +1,221 @@
 // === Başarımlar (Badges) Modülü ===
-// Oyun sonlarında çağrılır, koşullar sağlanmışsa başarım verir.
-// Kazanılan başarımlar localStorage'da ("sizmaBadges") saklanır.
+// Her rozetin 5 kademesi (yıldızı) vardır. Oyun sonunda ölçü değeri hesaplanır,
+// geçilen eşik sayısı kadar yıldız dolar. Veri "sizmaBadges" altında saklanır:
+//   { rozetId: { v: <ölçü değeri>, stars: <0-5> } }
+//
+// Ölçü iki türlü olabilir:
+//   "life" → ömür boyu toplamdan okunur (zaten artan bir sayı)
+//   "best" → tek oyunun değeri; saklanan en iyiyle karşılaştırılır, düşmez
 
 const BADGES_KEY = "sizmaBadges";
+const STAR_COUNT = 5;
+
+// Tek oyunun WPM'i (typingMs 0 iken Infinity üretmesin diye korumalı)
+function sessionWpm(s) {
+  if (!s || !s.typingMs || s.typingMs <= 0) return 0;
+  return (s.typedChars / 5) / (s.typingMs / 60000);
+}
 
 const BADGES_DB = [
   {
     id: "first_blood",
-    title: "İlk Kan",
-    desc: "İlk Güvenlik Duvarı'nı (Boss) başarıyla çökert.",
+    title: "Duvar Kırıcı",
     icon: "☠️",
-    check: (sessionStats, lifeStats) => sessionStats.bossKilled > 0
+    unit: "boss",
+    desc: "Güvenlik Duvarı'nı çökert.",
+    mode: "life",
+    tiers: [3, 10, 25, 50, 150],
+    value: (s, life) => life.bossKilled,
   },
   {
     id: "speed_demon",
     title: "Hız Tutkunu",
-    desc: "50 WPM veya üzeri hıza ulaş.",
     icon: "⚡",
-    check: (sessionStats, lifeStats) => (sessionStats.typedChars / 5) / (sessionStats.typingMs / 60000) >= 50
+    unit: "WPM",
+    desc: "Tek oyunda ulaştığın en yüksek hız.",
+    mode: "best",
+    tiers: [45, 60, 75, 90, 110],
+    value: (s) => Math.floor(sessionWpm(s)),
   },
   {
     id: "sniper",
     title: "Keskin Nişancı",
-    desc: "En az 30 saniyelik bir oyunu %95 veya üzeri doğrulukla tamamla.",
     icon: "🎯",
-    check: (sessionStats, lifeStats) => sessionStats.typingMs >= 30000 && accuracyOf(sessionStats) >= 95
+    unit: "% doğruluk",
+    desc: "En az 30 saniyelik bir oyunda ulaştığın en yüksek doğruluk.",
+    mode: "best",
+    tiers: [95, 97, 98, 99, 100],
+    // Kısa oyunlarda doğruluk anlamsız derecede kolay -> 30 sn şartı korunuyor
+    value: (s) => (s.typingMs >= 30000 ? accuracyOf(s) : 0),
   },
   {
     id: "flawless_combo",
     title: "Kusursuz Seri",
-    desc: "Arka arkaya 15 komutu hiç hata yapmadan (kaçırmadan/yanlışsız) tamamla.",
     icon: "🔥",
-    check: (sessionStats, lifeStats) => sessionStats.bestStreak >= 15
-  },
-  {
-    id: "bomb_squad",
-    title: "Bomba Uzmanı",
-    desc: "Toplamda 5 bombayı başarıyla imha et.",
-    icon: "💣",
-    check: (sessionStats, lifeStats) => {
-      // lifeStats oyun sonu eklemesinden sonra geldiği için güncel durumu yansıtır.
-      // Bombayı 'imha etmek' (kazanmak) = (lifeStats.bombSpawned - lifeStats.bombLost) tarzı olabilirdi, 
-      // ama elimizde bombLost var, bombDone yok. 
-      // Basitlik için bossKilled gibi toplam sayaçtan bakılabilir. 
-      // Not: Oyun mekaniğinde bomba imhası (cmdDone) genel cmdDone'a yazılıyor.
-      // Özel bombDone eklemediğimiz için bu başarıyı "5 oyun oyna" gibi basit bir şeye veya 
-      // 200 WPM harf sayısına bağlayalım.
-      return lifeStats.games >= 5; // Placeholder condition
-    }
-  },
-  {
-    id: "veteran",
-    title: "Kıdemli Sızmacı",
-    desc: "Toplam 100 oyun oyna.",
-    icon: "🎖️",
-    check: (sessionStats, lifeStats) => lifeStats.games >= 100
+    unit: "seri",
+    desc: "Arka arkaya hatasız tamamladığın en uzun komut serisi.",
+    mode: "life",
+    tiers: [25, 50, 100, 200, 350],
+    value: (s, life) => life.bestStreak,
   },
   {
     id: "clean_run",
     title: "Hayalet",
-    desc: "Hiçbir tuzak veya bombaya düşmeden bir oyunu tamamla.",
     icon: "👻",
-    check: (sessionStats, lifeStats) => sessionStats.decoyHit === 0 && sessionStats.bombLost === 0 && sessionStats.cmdDone > 10
-  }
+    unit: "temiz oyun",
+    desc: "Hiçbir tuzağa veya bombaya düşmeden bitirdiğin oyunlar.",
+    mode: "life",
+    tiers: [5, 15, 30, 75, 200],
+    value: (s, life) => life.cleanRuns || 0,
+  },
+  {
+    id: "bomb_squad",
+    title: "Bomba Uzmanı",
+    icon: "💣",
+    unit: "bomba",
+    desc: "Patlamadan yazıp imha ettiğin saatli bombalar.",
+    mode: "life",
+    tiers: [15, 40, 100, 250, 600],
+    value: (s, life) => life.bombDone || 0,
+  },
+  {
+    id: "veteran",
+    title: "Kıdemli Sızmacı",
+    icon: "🎖️",
+    unit: "oyun",
+    desc: "Toplam oynadığın oyun sayısı.",
+    mode: "life",
+    tiers: [10, 50, 200, 500, 1500],
+    value: (s, life) => life.games,
+  },
 ];
 
 // --- Yardımcılar ---
+
+// Değere karşılık gelen yıldız sayısı
+function starsOf(badge, v) {
+  let n = 0;
+  for (const t of badge.tiers) if (v >= t) n++;
+  return n;
+}
+
+// "★★★☆☆"
+function starString(n) {
+  return "★".repeat(n) + "☆".repeat(STAR_COUNT - n);
+}
+
 function loadBadges() {
-  try {
-    return JSON.parse(localStorage.getItem(BADGES_KEY)) || [];
-  } catch (e) {
-    return [];
+  let raw;
+  try { raw = JSON.parse(localStorage.getItem(BADGES_KEY)); }
+  catch (e) { raw = null; }
+
+  // Eski biçim (kazanılan id'lerin düz listesi) -> yıldızlı biçime taşı.
+  // Kazanılmış her rozet en az 1 yıldızla başlasın ki emek kaybolmasın.
+  if (Array.isArray(raw)) {
+    const migrated = {};
+    for (const b of BADGES_DB) {
+      if (raw.includes(b.id)) migrated[b.id] = { v: b.tiers[0], stars: 1 };
+    }
+    return migrated;
   }
+  return raw && typeof raw === "object" ? raw : {};
 }
 
 function saveBadges(b) {
-  try {
-    localStorage.setItem(BADGES_KEY, JSON.stringify(b));
-  } catch (e) {}
+  try { localStorage.setItem(BADGES_KEY, JSON.stringify(b)); } catch (e) {}
 }
 
-// Oyun sonu çağrılır
+function resetBadges() {
+  try { localStorage.removeItem(BADGES_KEY); } catch (e) {}
+}
+
+// Toplam yıldız (panel başlığı için)
+function totalStars() {
+  const store = loadBadges();
+  let n = 0;
+  for (const b of BADGES_DB) n += (store[b.id] && store[b.id].stars) || 0;
+  return n;
+}
+
+// --- Oyun sonu değerlendirmesi ---
 function evaluateBadges(sessionStats, lifeStats) {
-  const earned = loadBadges();
-  const newlyEarned = [];
+  const store = loadBadges();
+  const yukselenler = [];
 
   for (const badge of BADGES_DB) {
-    // Zaten kazanılmışsa atla
-    if (earned.includes(badge.id)) continue;
-    
-    // Kazanma şartı sağlandı mı?
-    if (badge.check(sessionStats, lifeStats)) {
-      earned.push(badge.id);
-      newlyEarned.push(badge);
-    }
+    const onceki = store[badge.id] || { v: 0, stars: 0 };
+    let deger = badge.value(sessionStats, lifeStats) || 0;
+    // "best" ölçüler geriye gitmez: kötü bir oyun kazanılmış yıldızı düşürmesin
+    if (badge.mode === "best") deger = Math.max(onceki.v, deger);
+
+    const yildiz = starsOf(badge, deger);
+    store[badge.id] = { v: deger, stars: yildiz };
+    if (yildiz > onceki.stars) yukselenler.push({ badge, yildiz });
   }
 
-  if (newlyEarned.length > 0) {
-    saveBadges(earned);
-    // Sırayla bildirim (toast) göster
-    newlyEarned.forEach((b, i) => {
-      setTimeout(() => showBadgeToast(b), i * 1500); // 1.5 saniye arayla
-    });
-  }
+  saveBadges(store);
+
+  yukselenler.forEach((y, i) => {
+    setTimeout(() => showBadgeToast(y.badge, y.yildiz), i * 1500);
+  });
 }
 
-// UI: Bildirim (Toast)
-function showBadgeToast(badge) {
-  // Eğer ses açıksa ufak bir başarı jingle çalabilir
-  if (typeof playSound === "function") {
-    playSound("badge"); // audio.js'e eklenecek
-  }
+// --- UI: Bildirim (Toast) ---
+function showBadgeToast(badge, yildiz) {
+  if (typeof playSound === "function") playSound("badge");
 
+  const tamam = yildiz >= STAR_COUNT;
   const toast = document.createElement("div");
   toast.className = "badge-toast";
-  toast.innerHTML = 
+  toast.innerHTML =
     '<div class="badge-toast-icon">' + badge.icon + '</div>' +
     '<div class="badge-toast-text">' +
-      '<h4>BAŞARIM KAZANILDI</h4>' +
+      '<h4>' + (tamam ? "ROZET TAMAMLANDI" : yildiz === 1 ? "BAŞARIM KAZANILDI" : "ROZET YÜKSELDİ") + '</h4>' +
       '<p>' + badge.title + '</p>' +
+      '<span class="badge-stars">' + starString(yildiz) + '</span>' +
     '</div>';
-  
-  document.body.appendChild(toast);
-  
-  // Animasyon için bir frame bekle
-  requestAnimationFrame(() => {
-    toast.classList.add("show");
-  });
 
-  // 4 saniye sonra kaldır
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add("show"));
   setTimeout(() => {
     toast.classList.remove("show");
-    setTimeout(() => toast.remove(), 400); // geçiş süresi kadar daha bekle
+    setTimeout(() => toast.remove(), 400);
   }, 4000);
 }
 
-// HTML Üretici (Stats Panel için)
+// --- UI: İstatistik panelindeki rozet ızgarası ---
 function renderBadgesPanel() {
-  const earned = loadBadges();
-  
-  let html = '<p class="stat-title">rozetlerim (' + earned.length + '/' + BADGES_DB.length + ')</p>';
+  const store = loadBadges();
+  const enFazla = BADGES_DB.length * STAR_COUNT;
+
+  let html = '<p class="stat-title">rozetlerim (' + totalStars() + '/' + enFazla + ' ★)</p>';
   html += '<div class="badge-grid">';
 
   BADGES_DB.forEach(badge => {
-    const isEarned = earned.includes(badge.id);
-    html += 
-      '<div class="badge-item ' + (isEarned ? 'earned' : 'locked') + '" title="' + badge.desc + '">' +
-        '<div class="badge-icon">' + (isEarned ? badge.icon : '🔒') + '</div>' +
+    const kayit = store[badge.id] || { v: 0, stars: 0 };
+    const yildiz = kayit.stars;
+    const acik = yildiz > 0;
+    const tamam = yildiz >= STAR_COUNT;
+    // Henüz yıldız yok ama ilerleme var: tamamen kilitli göstermek yerine
+    // "başladın" durumu — simge görünür, ilerleme okunabilir kalır.
+    const basladi = !acik && kayit.v > 0;
+
+    // Bir sonraki kademeye ne kaldı?
+    let ilerleme;
+    if (tamam) {
+      ilerleme = "tamamlandı · " + Math.round(kayit.v) + " " + badge.unit;
+    } else {
+      const hedef = badge.tiers[yildiz];
+      ilerleme = Math.round(kayit.v) + " / " + hedef + " " + badge.unit;
+    }
+
+    html +=
+      '<div class="badge-item ' + (acik ? 'earned' : basladi ? 'started' : 'locked') +
+           (tamam ? ' maxed' : '') + '" title="' + badge.desc + '">' +
+        '<div class="badge-icon">' + (acik || basladi ? badge.icon : '🔒') + '</div>' +
         '<div class="badge-title">' + badge.title + '</div>' +
+        '<div class="badge-stars">' + starString(yildiz) + '</div>' +
+        '<div class="badge-progress">' + ilerleme + '</div>' +
       '</div>';
   });
 

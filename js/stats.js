@@ -35,6 +35,8 @@ function emptyStats() {
     decoyHit: 0,       // düşülen tuzak
     decoyAvoided: 0,   // yere düşmesine izin verilen tuzak (doğru davranış)
     bombLost: 0,       // patlayan/kaçan bomba
+    bombDone: 0,       // patlamadan yazılıp imha edilen bomba
+    cleanRuns: 0,      // tuzağa/bombaya hiç düşülmeden bitirilen oyun (ömür boyu)
     bossKilled: 0,     // yenilen boss
     bestStreak: 0,     // en uzun seri
     score: 0,
@@ -340,8 +342,12 @@ function statsEndGame(score, diffName) {
   life.games++;
   const scalars = ["keysTotal","keysCorrect","keysWrong","keysStray","typedChars",
                    "typingMs","cmdDone","cmdMissed","decoyHit","decoyAvoided",
-                   "bombLost","bossKilled"];
-  for (const k of scalars) life[k] += sStats[k];
+                   "bombLost","bombDone","bossKilled"];
+  for (const k of scalars) life[k] += (sStats[k] || 0);
+  // Temiz oyun: hiç tuzağa/bombaya düşmeden ve iş yapmış sayılacak kadar komut
+  if (sStats.decoyHit === 0 && sStats.bombLost === 0 && sStats.cmdDone > 10) {
+    life.cleanRuns = (life.cleanRuns || 0) + 1;
+  }
   if (sStats.bestStreak > life.bestStreak) life.bestStreak = sStats.bestStreak;
   if (score > life.score) life.score = score;
   const maps = ["charAttempts","charErrors","charTimeMs","charTimeN","confusions",
@@ -363,6 +369,9 @@ function resetStats() {
     localStorage.removeItem(STATS_KEY);
     localStorage.removeItem(HISTORY_KEY);
   } catch (e) {}
+  // Rozet yıldızları ömür boyu veriden türüyor; veri sıfırlanınca onlar da
+  // sıfırlanmalı, yoksa "300 bomba imha ettin" diyen bir rozet 0 bombayla kalır.
+  if (typeof resetBadges === "function") resetBadges();
 }
 
 // ==========================================================================
@@ -688,7 +697,7 @@ function exportData() {
     stats: loadLifetime(),
     history: loadHistory(),
     leaderboard: loadLeaderboard(),
-    badges: typeof loadBadges === "function" ? loadBadges() : []
+    badges: typeof loadBadges === "function" ? loadBadges() : {}
   };
   const jsonStr = JSON.stringify(data, null, 2);
   const blob = new Blob([jsonStr], { type: "application/json" });
@@ -700,4 +709,25 @@ function exportData() {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+}
+
+// JSON Dosyasından İçe Aktar
+function importData(jsonString) {
+  try {
+    const data = JSON.parse(jsonString);
+    if (data.stats) saveLifetime(data.stats);
+    if (data.history) {
+      try { localStorage.setItem(HISTORY_KEY, JSON.stringify(data.history)); } catch (e) {}
+    }
+    if (data.leaderboard) {
+      try { localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(data.leaderboard)); } catch (e) {}
+    }
+    if (data.badges && typeof saveBadges === "function") {
+      saveBadges(data.badges);
+    }
+    return true;
+  } catch (e) {
+    console.error("Veri içe aktarma hatası:", e);
+    return false;
+  }
 }

@@ -953,6 +953,7 @@ function completeCommand(s) {
   } else {
     streak++;
     trackEvent("cmdDone");
+    if (s.isBomb) trackEvent("bombDone");   // patlamadan yazılan bomba = imha
     trackStreak(streak);
     // Süre ödülü komut uzunluğuyla ölçekli (uzun komut = çok emek = çok süre)
     // Ödül = okuma payı + hedef hızda bu komutu yazmanın süresi.
@@ -1146,7 +1147,7 @@ function endGame() {
 
   // Skor tutulmayan modlarda paylaşacak bir skor da yok → düğmeyi gizle
   const shareBtn = document.getElementById("shareScoreBtn");
-  if (shareBtn) shareBtn.parentElement.classList.toggle("hidden", isZamansiz());
+  if (shareBtn) shareBtn.classList.toggle("hidden", isZamansiz());
 
   // Pratik modunda skor ve rekor anlamsız (ceza yok, süre yok — skor sadece
   // ne kadar oynadığını gösterirdi). Sonuç ekranı analiz raporuna dönüşür.
@@ -1320,7 +1321,12 @@ if (finishBtn) finishBtn.addEventListener("click", () => { if (running) endGame(
 
 // Son seçilen modu hatırla
 gameMode = localStorage.getItem("sizmaMode") || "sizma";
-restartBtn.addEventListener("click", showMenu);
+// "tekrar oyna" gerçekten yeniden başlatır: aynı mod, aynı zorluk, menüye uğramadan.
+// (Eskiden bu düğme de menüye dönüyordu — etiketi yanlıştı.)
+restartBtn.addEventListener("click", () => startGame(currentDiffName));
+// Menüye dönüş ayrı düğmede
+const menuBtn = document.getElementById("menuBtn");
+if (menuBtn) menuBtn.addEventListener("click", showMenu);
 
 // --- İstatistik paneli ---
 const statsPanelEl = document.getElementById("statsPanel");
@@ -1355,6 +1361,29 @@ const exportBtn = document.getElementById("exportBtn");
 if (exportBtn) {
   exportBtn.addEventListener("click", () => {
     if (typeof exportData === "function") exportData();
+  });
+}
+
+const importBtn = document.getElementById("importBtn");
+const importFile = document.getElementById("importFile");
+if (importBtn && importFile) {
+  importBtn.addEventListener("click", () => importFile.click());
+  importFile.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    // aynı dosya tekrar seçilebilsin diye input'u sıfırla
+    e.target.value = "";
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      if (typeof importData === "function" && importData(ev.target.result)) {
+        alert("Veriler başarıyla içe aktarıldı! Sayfa yenileniyor...");
+        location.reload();
+      } else {
+        alert("Veri içe aktarılamadı. Dosya hatalı veya bozuk olabilir.");
+      }
+    };
+    reader.onerror = () => alert("Dosya okunamadı.");
+    reader.readAsText(file);
   });
 }
 document.getElementById("statsResetBtn").addEventListener("click", () => {

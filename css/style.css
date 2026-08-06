@@ -566,6 +566,30 @@ body {
 /* --- Butonlar --- */
 .menu-btns { display: flex; gap: 12px; margin-top: 6px; }
 
+/* --- Oyun sonu eylem çubuğu ---
+   Rapor uzun olduğunda (zayıf harfler, seviye kutusu, rozetler) butonlar
+   ekranın altında kalıp görünmez oluyordu. Panel kaysa da altta sabit dursun. */
+.over-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 0;
+  background: var(--color-panel);
+  border-top: 1px solid var(--color-line);
+  box-shadow: 0 -12px 20px -12px rgba(0, 0, 0, 0.9);
+}
+/* Çubuk panelin dibine tam otursun: .overlay'in alt iç boşluğunu ve
+   :last-child'a verilen auto margin'i sıfırla (negatif margin sticky
+   hizasını bozduğu için bu yol tercih edildi). */
+#gameover { padding-bottom: 0; }
+#gameover .over-actions { margin-bottom: 0; }
+
 .diff-btn {
   font-family: inherit;
   background: rgba(var(--rgb-primary), 0.1);
@@ -1130,6 +1154,10 @@ body {
   opacity: 0.4;
   filter: grayscale(100%);
 }
+/* İlerleme var ama ilk yıldız henüz gelmedi: okunur kalsın */
+.badge-item.started {
+  opacity: 0.8;
+}
 .badge-item.earned {
   border-color: var(--color-success);
   background: rgba(var(--rgb-success), 0.1);
@@ -1144,6 +1172,39 @@ body {
   color: var(--color-text);
 }
 .badge-item.earned .badge-title {
+  color: var(--color-success);
+}
+/* Yıldız kademeleri: dolu yıldızlar parlar, boşlar soluk kalır.
+   Tek bir metin olduğu için dolu/boş ayrımını letter-spacing + renkle değil,
+   ★ ve ☆ karakterleriyle yapıyoruz; renk tümüne uygulanır. */
+.badge-stars {
+  font-size: calc(13px * var(--font-scale));
+  letter-spacing: 2px;
+  line-height: 1;
+  color: var(--color-line-2);
+}
+.badge-item.earned .badge-stars {
+  color: var(--color-success);
+  text-shadow: 0 0 8px rgba(var(--rgb-success), 0.5);
+}
+.badge-item.maxed {
+  border-color: var(--color-accent);
+  background: rgba(var(--rgb-accent), 0.12);
+  box-shadow: 0 0 14px rgba(var(--rgb-accent), 0.25);
+}
+.badge-item.maxed .badge-stars,
+.badge-item.maxed .badge-title {
+  color: var(--color-accent);
+  text-shadow: 0 0 8px rgba(var(--rgb-accent), 0.5);
+}
+.badge-progress {
+  font-size: calc(10px * var(--font-scale));
+  color: var(--color-noise);
+}
+/* Toast içindeki yıldızlar */
+.badge-toast .badge-stars {
+  display: block;
+  margin-top: 4px;
   color: var(--color-success);
 }
 

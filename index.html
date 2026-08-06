@@ -90,6 +90,8 @@
         <div class="menu-btns" style="margin-top:20px;">
           <button class="diff-btn" id="statsCloseBtn">geri</button>
           <button class="link-btn" id="exportBtn">💾 dışa aktar</button>
+          <button class="link-btn" id="importBtn">📂 içe aktar</button>
+          <input type="file" id="importFile" accept=".json" style="display: none;">
           <button class="link-btn danger" id="statsResetBtn">sıfırla</button>
         </div>
       </div>
@@ -148,11 +150,11 @@
         <p class="over-best" id="overBestRow">en iyi: <span id="bestScore">0</span></p>
         <div class="level-box" id="overLevel"></div>
         <div class="stats-body" id="overStats"></div>
-        <div class="menu-btns" style="margin-bottom: 10px;">
-          <button class="diff-btn" id="shareScoreBtn">🔗 skoru kopyala</button>
-        </div>
-        <div class="menu-btns">
-          <button class="diff-btn" id="restartBtn">tekrar oyna</button>
+        <!-- Eylem çubuğu: panel kayarken bile altta sabit kalır -->
+        <div class="over-actions">
+          <button class="diff-btn" id="restartBtn">↻ tekrar oyna</button>
+          <button class="diff-btn" id="menuBtn">← menüye dön</button>
+          <button class="link-btn" id="shareScoreBtn">🔗 skoru kopyala</button>
           <button class="link-btn" id="overStatsBtn">📊 detaylı analiz</button>
         </div>
       </div>
