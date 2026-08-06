@@ -1165,6 +1165,14 @@ body {
   transform: scale(0.94);
 }
 
+.settings-hint {
+  margin-top: 6px;
+  font-size: calc(10px * var(--font-scale));
+  line-height: 1.5;
+  color: var(--color-noise);
+  max-width: 44ch;
+}
+
 .kbd-controls {
   order: 99;            /* renderKeyboard satırları sona eklediği için */
   display: flex;

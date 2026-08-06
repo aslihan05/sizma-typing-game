@@ -1245,6 +1245,32 @@ if (kbdEscapeBtn) {
   });
 }
 
+// Ayarlar panelindeki açık/kapalı anahtarı.
+// Uyarı ekranı yalnızca BİR KEZ çıkar (sizmaKeyboardOK yazıldıktan sonra bir
+// daha sorulmaz); bu yüzden seçimi sonradan değiştirmenin bir yolu olmalı.
+// Olmayınca "klavyem var" diyen oyuncu ekran klavyesine hiç ulaşamıyordu.
+const softKbdGroup = document.getElementById("softKbdGroup");
+
+function softAyarTazele() {
+  if (!softKbdGroup) return;
+  const acik = softAktif();
+  softKbdGroup.querySelectorAll("[data-soft]").forEach((b) => {
+    b.classList.toggle("active", (b.dataset.soft === "1") === acik);
+  });
+}
+
+if (softKbdGroup) {
+  softKbdGroup.querySelectorAll("[data-soft]").forEach((b) => {
+    b.addEventListener("click", () => {
+      if (b.dataset.soft === "1") localStorage.setItem(SOFT_KEY, "1");
+      else localStorage.removeItem(SOFT_KEY);
+      softAyarTazele();
+      softArayuzuTazele();
+    });
+  });
+  softAyarTazele();
+}
+
 const touchSoftBtn = document.getElementById("touchSoftBtn");
 if (touchSoftBtn) {
   touchSoftBtn.addEventListener("click", () => {
@@ -1809,6 +1835,8 @@ if (typeof initAudio === "function") initAudio();
 
 // --- Açılışta menüyü göster ---
 showMenu();
+// Dokunmatik tercihi hatırlanmış olabilir: klavyeyi açılışta da o duruma getir
+softArayuzuTazele();
 
 // İlk kez oynayan oyuncuya tutorial göster
 if (!localStorage.getItem(TUTORIAL_KEY)) {
