@@ -35,6 +35,34 @@ Düşmanlar oyun ilerledikçe kademeli açılır.
 | 🎯 **Pratik** | Süre yok, ceza yok, düşman yok. Saat yukarı sayar, sonunda analiz raporu. |
 | 📅 **Günlük** | Günün tarihinden tohumlanmış sabit görev — herkes aynı komutları, aynı tuzakları görür. |
 | ✋ **Parmak** | Komut yerine üretilmiş alıştırma dizileri (`fff jjj fjf`). Ev/üst/alt sıra, sol/sağ el veya "zayıf noktam". |
+| 🎓 **Eğitim** | Sıfırdan başlayanlar için 10 derslik müfredat: sıralı kilit, ders başına doğruluk + hız eşiği, yıldızlar. |
+
+### 🎓 Eğitim modu
+
+Parmak modu serbest antrenmandır; Eğitim modu ise bir **öğrenme yoludur** —
+"şimdi ne çalışmalıyım, hazır mıyım" sorusunu oyun cevaplar.
+
+| # | Ders | Doğruluk | Hız |
+|---|------|----------|-----|
+| 1 | Dayanak tuşları | %96 | 12 WPM |
+| 2 | Ev sırası | %95 | 14 |
+| 3 | Üst sıra — işaret & orta | %95 | 14 |
+| 4 | Üst sıra tamamı | %95 | 16 |
+| 5 | Alt sıra — işaret & orta | %95 | 16 |
+| 6 | Alt sıra tamamı | %95 | 18 |
+| 7 | Tüm klavye | %95 | 20 |
+| 8 | **Gerçek komutlar** | %95 | 22 |
+| 9 | Türkçe harfler (ğüşöçı) | %95 | 22 |
+| 10 | Rakam & noktalama | %94 | 18 |
+
+- Bir ders **10 alıştırma satırı** sürer; süre baskısı ve ceza yoktur.
+- Geçmek için **hem doğruluk hem hız** eşiği tutmalıdır — hızlı ama hatalı
+  yazmak yıldız kazandırmaz.
+- Yıldızlar: geçme ★, hedefin 1.2 katı ★★, 1.5 katı ★★★. **Yıldız düşmez** —
+  kötü bir tekrar oynayış önceki sonucu bozmaz.
+- Kilitli dersler **yine de tıklanabilir**: kilit yol gösterir, duvar örmez.
+- Dersler harf değil **konum** tabanlıdır; klavye düzenini değiştirmek
+  ilerlemeyi bozmaz. (EN düzeninde Türkçe harfler dersi gizlenir.)
 
 ## Öğrenme tarafı
 
@@ -42,11 +70,23 @@ Bu bir oyun kadar bir **öğretme aracı**:
 
 - **Ekran klavyesi** TR-Q / TR-F / EN düzenlerini destekler, sıradaki tuşu ve hangi parmakla basılacağını gösterir.
 - **Uyarlanır hedefleme** — 150 tuştan sonra oyun, hata oranın yüksek olan harfleri ve en zayıf parmağının harflerini içeren komutları daha sık gönderir.
-- **Analiz** — WPM trend grafiği, klavye ısı haritası, parmak ve sıra bazlı doğruluk, en yavaş / en hatalı harfler, JSON dışa aktarma.
+- **Müfredat** — 🎓 Eğitim modu sıfırdan başlayanı dayanak tuşlarından gerçek komutlara götürür.
+- **Analiz** — WPM trend grafiği, klavye ısı haritası, parmak ve sıra bazlı doğruluk, en yavaş / en hatalı harfler.
 - **Seviye / XP** — XP doğrudan doğru yazılan karakter sayısıdır. Zorluk seçimiyle veya comboyla oynanamaz.
-- **Rozetler** ve yerel en iyi 10 maç tablosu.
+- **Rozetler** (5 yıldızlı kademeler) ve yerel en iyi 10 maç tablosu.
 
 Tüm veri tarayıcının `localStorage`'ında durur; hesap yok, sunucuya hiçbir şey gitmez.
+
+### Verini taşımak / yedeklemek
+
+Analiz panelindeki **💾 dışa aktar** bütün ilerlemeni (istatistik, geçmiş, lider
+tablosu, rozetler, ders ilerlemesi) tek bir `sizma-data.json` dosyasına indirir;
+**📂 içe aktar** aynı dosyayı geri yükler.
+
+> **Dikkat:** `localStorage` adres başına ayrılır — `http://127.0.0.1:5500` ile
+> `http://localhost:5500` ya da farklı bir port tarayıcı için ayrı sitelerdir ve
+> ilerlemen "kaybolmuş" gibi görünür. Oyunu hep aynı adresten aç; VS Code Live
+> Server kullanıyorsan portu sabitle.
 
 ## Çalıştırma
 
@@ -80,8 +120,9 @@ efektleri devre dışı kalır; işlevsel renkler korunur. Ayarlardan tema
 index.html
 css/style.css        görsel tema, CRT efekti, tema değişkenleri
 js/keyboard.js       ekran klavyesi, düzenler, parmak renkleri, ısı haritası
-js/stats.js          analiz, seviye/XP, grafik, lider tablosu, dışa aktarma
+js/stats.js          analiz, seviye/XP, grafik, lider tablosu, dışa/içe aktarma
 js/drills.js         parmak antrenmanı dizileri
+js/lessons.js        eğitim modu müfredatı, ders ilerlemesi ve değerlendirme
 js/balance.js        zorluk ve denge sabitleri
 js/audio.js          Web Audio ile sentetik terminal sesleri
 js/badges.js         rozet/başarım sistemi
@@ -90,6 +131,9 @@ js/main.js           oyun döngüsü, üretim, modlar, ekranlar
 ```
 
 Derleme adımı ve bağımlılık yok. Tek dış kaynak: Google Fonts üzerinden JetBrains Mono.
+
+Kodun içine girecekler için mimari, veri modeli ve "yeni komut/rozet/ders nasıl
+eklenir" tarifleri: **[docs/MIMARI.md](docs/MIMARI.md)**.
 
 ## Tasarım kararları
 
@@ -106,6 +150,9 @@ Birkaç seçim bilinçli ve oyunun tamamını şekillendiriyor:
 - **XP doğrudan doğru yazılan karakter sayısı.** Ayrı bir puan sayacı tutulmuyor,
   yani zorluk seçimiyle veya comboyla şişirilemez. "Verileri sıfırla" dendiğinde
   seviye de dürüstçe sıfırlanır.
+- **Derste geçme kriteri hem doğruluk hem hız.** Yalnız doğruluk olsaydı tek
+  parmakla bakarak yazan biri de müfredatı bitirirdi; yalnız hız olsaydı yanlış
+  alışkanlık ödüllendirilirdi. Doğruluk birincil, hız ikincildir.
 - **Parmak antrenmanında gerçek kelime kullanılmıyor.** Kelime yazmak belirli bir
   parmağı izole edemez — "kilidi aç" yazarken sekiz parmak birden çalışır. Parmak
   kası ancak o parmağın harfleri arka arkaya tekrarlanınca oturur. Kurgu bozulmasın
@@ -127,5 +174,12 @@ Birkaç seçim bilinçli ve oyunun tamamını şekillendiriyor:
 
 ## Durum
 
-Oynanabilir. Sıradaki işler: denge sayılarının gerçek oynanışla doğrulanması,
-zorluk bazlı ayrı istatistikler ve müfredat/hikâye katmanı.
+Oynanabilir ve özellik olarak tamam: beş mod, düşman kadrosu ve boss, analiz,
+seviye, rozetler, müfredat.
+
+Sıradaki işler:
+
+- **Denge doğrulaması** — `js/balance.js` sayıları ve Eğitim modu ders eşikleri
+  masabaşı hesaplarla belirlendi; gerçek oynanışla sınanıp revize edilecek.
+- Zorluk bazlı ayrı istatistikler.
+- Hikâye katmanı.
