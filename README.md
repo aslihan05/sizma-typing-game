@@ -88,17 +88,37 @@ tablosu, rozetler, ders ilerlemesi) tek bir `sizma-data.json` dosyasına indirir
 > ilerlemen "kaybolmuş" gibi görünür. Oyunu hep aynı adresten aç; VS Code Live
 > Server kullanıyorsan portu sabitle.
 
-## Çalıştırma
+## Oyna
 
-Depoyu indirip `index.html`'i açman yeterli. Ancak skoru panoya kopyalama gibi
-bazı tarayıcı API'leri `file://` altında kısıtlıdır, bu yüzden küçük bir yerel
-sunucu önerilir:
+**→ [aslihan05.github.io/sizma-typing-game](https://aslihan05.github.io/sizma-typing-game/)**
+
+Kurulum gerekmez, tarayıcıda açılır. Fiziksel klavye gerekir — oyun 10 parmak
+öğretmek için tasarlandı, dokunmatik ekranda oynanmaz.
+
+### Uygulama olarak kurmak
+
+Oyun bir **PWA**'dır: Chrome / Edge adres çubuğundaki "Yükle" simgesine
+tıklayınca bilgisayarına kendi ikonu ve penceresi olan bir uygulama olarak
+kurulur ve **çevrimdışı** çalışır. Android'de "Ana ekrana ekle" aynı işi görür.
+
+Tüm dosyalar ilk ziyarette önbelleğe alınır (`sw.js`); sonraki açılışlarda
+internet gerekmez. Veriler zaten `localStorage`'da, sunucuya hiçbir şey gitmez.
+
+## Geliştirme
+
+Depoyu indirip `index.html`'i açman yeterli. Ancak service worker ve panoya
+kopyalama gibi bazı tarayıcı API'leri `file://` altında çalışmaz, bu yüzden
+küçük bir yerel sunucu önerilir:
 
 ```bash
 python -m http.server 8000
 ```
 
 Sonra tarayıcıda `http://localhost:8000` adresine git.
+
+> Service worker geliştirmeyi zorlaştırabilir: değişikliklerin görünmesi için
+> `sw.js` içindeki `SURUM` sabitini artır, ya da tarayıcının geliştirici
+> araçlarında "Update on reload" seçeneğini aç.
 
 ## Erişilebilirlik
 
@@ -118,6 +138,9 @@ efektleri devre dışı kalır; işlevsel renkler korunur. Ayarlardan tema
 
 ```
 index.html
+manifest.json        PWA künyesi (ad, ikonlar, renkler)
+sw.js                service worker — çevrimdışı önbellek
+icons/               uygulama ikonları
 css/style.css        görsel tema, CRT efekti, tema değişkenleri
 js/keyboard.js       ekran klavyesi, düzenler, parmak renkleri, ısı haritası
 js/stats.js          analiz, seviye/XP, grafik, lider tablosu, dışa/içe aktarma

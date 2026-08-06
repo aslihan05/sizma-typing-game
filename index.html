@@ -4,6 +4,17 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SIZMA — Hacker Yazma Oyunu</title>
+  <meta name="description" content="Hacker temalı, Türkçe 10 parmak yazma oyunu. Komutu gürültüden ayıkla ve süre bitmeden doğru yaz." />
+
+  <!-- PWA: kurulabilir + çevrimdışı çalışır (bkz. manifest.json, sw.js) -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0a0e0a" />
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="SIZMA" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -207,5 +218,17 @@
 <script src="js/badges.js"></script>
 <script src="js/settings.js"></script>
 <script src="js/main.js"></script>
+
+<!-- Service worker: çevrimdışı oynanabilirlik ve "uygulama olarak yükle".
+     file:// ile açıldığında kayıt başarısız olur; oyun yine normal çalışır. -->
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("sw.js").catch((e) => {
+        console.info("Service worker kaydedilemedi (yerel dosya olarak açılmış olabilir):", e.message);
+      });
+    });
+  }
+</script>
 </body>
 </html>

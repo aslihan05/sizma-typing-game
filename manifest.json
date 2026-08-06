@@ -1,0 +1,34 @@
+{
+  "name": "SIZMA — Hacker Yazma Oyunu",
+  "short_name": "SIZMA",
+  "description": "Hacker temalı, Türkçe 10 parmak yazma oyunu. Komutu gürültüden ayıkla ve süre bitmeden doğru yaz.",
+  "lang": "tr",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#0a0e0a",
+  "theme_color": "#0a0e0a",
+  "categories": ["games", "education"],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
