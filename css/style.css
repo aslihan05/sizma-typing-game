@@ -1130,6 +1130,95 @@ body {
 }
 
 /* ============================================================
+   Faz 12: Eğitim modu — müfredat
+   ============================================================ */
+.lesson-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+  margin: 10px 0 4px;
+  /* 10 ders menüyü taşırabilir; liste kendi içinde kaysın */
+  max-height: 240px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.lesson-card {
+  font-family: inherit;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--color-line-2);
+  border-radius: 6px;
+  padding: 8px 10px;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  transition: border-color 0.15s, background 0.15s;
+}
+.lesson-card:hover {
+  border-color: var(--color-primary);
+  background: rgba(var(--rgb-primary), 0.08);
+}
+/* Kilitli ders soluk ama TIKLANABİLİR — kilit yol gösterir, duvar örmez */
+.lesson-card.locked { opacity: 0.5; }
+.lesson-card.locked:hover { opacity: 0.8; }
+/* Oyuncunun kaldığı yer öne çıksın */
+.lesson-card.current {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 10px rgba(var(--rgb-accent), 0.25);
+}
+.lesson-card.done { border-color: var(--color-success); }
+.lesson-no {
+  font-size: calc(10px * var(--font-scale));
+  color: var(--color-noise);
+}
+.lesson-name {
+  font-size: calc(12px * var(--font-scale));
+  color: var(--color-text);
+}
+.lesson-card.done .lesson-name { color: var(--color-success); }
+.lesson-stars {
+  font-size: calc(11px * var(--font-scale));
+  letter-spacing: 1px;
+  color: var(--color-line-2);
+}
+.lesson-card.done .lesson-stars { color: var(--color-success); }
+.lesson-goal {
+  font-size: calc(9px * var(--font-scale));
+  color: var(--color-noise);
+}
+
+/* Ders sonu değerlendirmesi */
+.lesson-result {
+  border: 1px solid var(--color-line-2);
+  border-radius: 6px;
+  padding: 12px;
+  margin: 10px 0;
+  text-align: center;
+}
+.lesson-result.pass { border-color: var(--color-success); background: rgba(var(--rgb-success), 0.08); }
+.lesson-result.fail { border-color: var(--color-danger); background: rgba(var(--rgb-danger), 0.06); }
+.lesson-verdict {
+  font-size: calc(15px * var(--font-scale));
+  margin-bottom: 6px;
+  letter-spacing: 1px;
+}
+.lesson-result.pass .lesson-verdict { color: var(--color-success); }
+.lesson-result.fail .lesson-verdict { color: var(--color-danger); }
+.lesson-detail {
+  font-size: calc(11px * var(--font-scale));
+  color: var(--color-noise);
+  margin: 2px 0;
+}
+.lesson-detail.ok { color: var(--color-success); }
+.lesson-detail.fail { color: var(--color-danger); }
+.lesson-unlock {
+  margin-top: 8px;
+  font-size: calc(12px * var(--font-scale));
+  color: var(--color-accent);
+}
+
+/* ============================================================
    Faz 9: Başarımlar / Rozetler
    ============================================================ */
 .badge-grid {

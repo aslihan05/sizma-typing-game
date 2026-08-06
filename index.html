@@ -60,6 +60,13 @@
           <button class="mode-btn" data-mode="pratik">🎯 Pratik</button>
           <button class="mode-btn" data-mode="gunluk">📅 Günlük</button>
           <button class="mode-btn" data-mode="drill">✋ Parmak</button>
+          <button class="mode-btn" data-mode="egitim">🎓 Eğitim</button>
+        </div>
+
+        <!-- Ders listesi (sadece 🎓 Eğitim modunda görünür) -->
+        <div class="hidden" id="lessonRow">
+          <p class="menu-label" id="lessonLabel">müfredat</p>
+          <div class="lesson-grid" id="lessonList"></div>
         </div>
 
         <!-- Parmak antrenmanı hedefi (sadece ✋ Parmak modunda görünür) -->
@@ -69,7 +76,7 @@
         </div>
 
         <p class="menu-label" id="diffLabel">zorluk seç</p>
-        <div class="menu-btns">
+        <div class="menu-btns" id="diffRow">
           <button class="diff-btn" data-diff="kolay">Kolay</button>
           <button class="diff-btn" data-diff="orta">Orta</button>
           <button class="diff-btn" data-diff="zor">Zor</button>
@@ -148,6 +155,8 @@
         <h2 class="over-title" id="overTitle">süre doldu</h2>
         <p class="over-score" id="overScoreRow">skor: <span id="finalScore">0</span></p>
         <p class="over-best" id="overBestRow">en iyi: <span id="bestScore">0</span></p>
+        <!-- Ders değerlendirmesi (sadece 🎓 Eğitim modunda dolar) -->
+        <div class="hidden" id="lessonResult"></div>
         <div class="level-box" id="overLevel"></div>
         <div class="stats-body" id="overStats"></div>
         <!-- Eylem çubuğu: panel kayarken bile altta sabit kalır -->
@@ -192,6 +201,7 @@
 <script src="js/keyboard.js"></script>
 <script src="js/stats.js"></script>
 <script src="js/drills.js"></script>
+<script src="js/lessons.js"></script>
 <script src="js/balance.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/badges.js"></script>

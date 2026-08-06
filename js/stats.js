@@ -372,6 +372,9 @@ function resetStats() {
   // Rozet yıldızları ömür boyu veriden türüyor; veri sıfırlanınca onlar da
   // sıfırlanmalı, yoksa "300 bomba imha ettin" diyen bir rozet 0 bombayla kalır.
   if (typeof resetBadges === "function") resetBadges();
+  // Ders ilerlemesi de ömür boyu veriye dayanır (WPM/doğruluk oradan ölçülür);
+  // "her şeyi sıfırla" dendiğinde müfredat da başa dönmeli.
+  if (typeof resetLessons === "function") resetLessons();
 }
 
 // ==========================================================================
@@ -697,7 +700,8 @@ function exportData() {
     stats: loadLifetime(),
     history: loadHistory(),
     leaderboard: loadLeaderboard(),
-    badges: typeof loadBadges === "function" ? loadBadges() : {}
+    badges: typeof loadBadges === "function" ? loadBadges() : {},
+    lessons: typeof loadLessons === "function" ? loadLessons() : null
   };
   const jsonStr = JSON.stringify(data, null, 2);
   const blob = new Blob([jsonStr], { type: "application/json" });
@@ -724,6 +728,11 @@ function importData(jsonString) {
     }
     if (data.badges && typeof saveBadges === "function") {
       saveBadges(data.badges);
+    }
+    // Eski dosyalarda bu alan yok — olmaması hata değil, ders ilerlemesi
+    // dokunulmadan bırakılır.
+    if (data.lessons && typeof saveLessons === "function") {
+      saveLessons(data.lessons);
     }
     return true;
   } catch (e) {

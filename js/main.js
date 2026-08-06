@@ -239,8 +239,9 @@ function generateSentence(forceNormal) {
     }
     return {
       before: buildNoise(), open: marker[0],
-      command: isDrill() ? makeUniqueDrill(drillTarget, activeCommands())
-                         : pickCommand(false),
+      command: isEgitim() ? lessonCommand()
+             : isDrill()  ? makeUniqueDrill(drillTarget, activeCommands())
+                          : pickCommand(false),
       close: marker[1],
       after: buildNoise(),
       flexBefore, flexAfter,
@@ -290,6 +291,17 @@ function generateSentence(forceNormal) {
       flexBefore, flexAfter,
       isDecoy: Math.random() < BALANCE.bossDecoyRate,
       isMutating: false, isBomb: false, isSplitter: false,
+    };
+  }
+
+  // Eğitim: dersin harf kümesinden üretilen alıştırma (Ders 8'de gerçek komut)
+  if (isEgitim()) {
+    return {
+      before: buildNoise(), open: marker[0],
+      command: lessonCommand(), close: marker[1],
+      after: buildNoise(),
+      flexBefore, flexAfter,
+      isDecoy: false, isMutating: false, isBomb: false, isSplitter: false,
     };
   }
 
@@ -536,6 +548,14 @@ let drillTarget = "ev";                 // parmak modunda ne çalışılıyor
 function isPratik() { return gameMode === "pratik"; }
 function isDrill()  { return gameMode === "parmak" || gameMode === "drill"; }
 function isGunluk() { return gameMode === "gunluk"; }
+function isEgitim() { return gameMode === "egitim"; }
+
+// --- Eğitim modu durumu (bkz. js/lessons.js) ---
+let currentLessonNo = 1;    // oynanan ders
+let lessonLinesDone = 0;    // bu derste tamamlanan satır
+let lessonFinish = false;   // ders doldu → döngü bir sonraki karede bitirsin
+                            // (endGame'i completeCommand'in ortasında çağırmak,
+                            //  o fonksiyonun geri kalanını yarım bırakırdı)
 
 // --- Seeded PRNG for Daily Challenge ---
 let currentSeed = 1;
@@ -553,7 +573,16 @@ function restoreRandom() {
   Math.random = originalRandom;
 }
 // Zaman baskısı olmayan modlar: saat yukarı sayar, ceza ve düşman yok
-function isZamansiz() { return isPratik() || isDrill(); }
+function isZamansiz() { return isPratik() || isDrill() || isEgitim(); }
+
+// Eğitimde satır içeriği: ders alıştırma dizisi üretir; Ders 8 ise oyunun
+// gerçek komut bankasını kullanır (dizilerden oyuna köprü).
+function lessonCommand() {
+  if (typeof lessonUsesCommands === "function" && lessonUsesCommands(currentLessonNo)) {
+    return pickCommand(false);
+  }
+  return makeUniqueLessonLine(currentLessonNo, activeCommands());
+}
 
 // Oyun "başladı" mı? Oyuncu ilk harfe basana kadar her şey donuk bekler:
 // saat işlemez, satırlar inmez. Ekran yine boştan dolmaya başlar (yumuşak
@@ -663,6 +692,13 @@ function gameLoop(timestamp) {
   // --- Saat ---
   // Sızma modunda geri sayım (zaman = can). Pratik modunda süre baskısı yok,
   // saat geçen süreyi YUKARI sayar; oyunu oyuncu "bitir" ile sonlandırır.
+  // Ders tamamlandı: completeCommand içinde bayrak kondu, bitişi burada yapıyoruz
+  if (lessonFinish) {
+    lessonFinish = false;
+    endGame();
+    return;
+  }
+
   if (isZamansiz()) {
     if (!waitingStart) clockEl.textContent = formatTime(elapsed);
   } else {
@@ -985,6 +1021,15 @@ function completeCommand(s) {
     spawnPopup("+" + points + (comboMult > 1 ? " x" + comboMult : ""), s.y, "#7ee787");
     if (typeof playComplete === "function") playComplete();
     if (bossActive) damageBoss();
+
+    // Ders ilerlemesi: belirlenen satır sayısı dolunca ders biter ve
+    // değerlendirilir. (Kaçan satır dersi uzatır, cezalandırmaz.)
+    if (isEgitim()) {
+      lessonLinesDone++;
+      statusEl.textContent = "ders " + currentLessonNo + " · " +
+                             lessonLinesDone + "/" + LESSON_LINES + " satır";
+      if (lessonLinesDone >= LESSON_LINES) lessonFinish = true;
+    }
   }
 
   s.el.classList.add("completed");                         // gürültü kaybolur (CSS)
@@ -1114,7 +1159,9 @@ function startGame(diffKey) {
   difficulty = DIFFICULTIES[diffKey];
   currentDiffName = diffKey;
   resetGame();
-  statsStartGame();                                  // analiz sayaçlarını sıfırla
+  lessonLinesDone = 0;
+  lessonFinish = false;
+  statsStartGame();                                // analiz sayaçlarını sıfırla
   const weak = refreshWeakLetters();                 // Faz 4: antrenman hedeflerini tazele
   if (typeof markWeakKeys === "function") markWeakKeys(weak);
   menuEl.classList.add("hidden");
@@ -1148,10 +1195,21 @@ function endGame() {
   // Skor tutulmayan modlarda paylaşacak bir skor da yok → düğmeyi gizle
   const shareBtn = document.getElementById("shareScoreBtn");
   if (shareBtn) shareBtn.classList.toggle("hidden", isZamansiz());
+  if (lessonResultEl && !isEgitim()) lessonResultEl.classList.add("hidden");
 
   // Pratik modunda skor ve rekor anlamsız (ceza yok, süre yok — skor sadece
   // ne kadar oynadığını gösterirdi). Sonuç ekranı analiz raporuna dönüşür.
-  if (isZamansiz()) {
+  if (isEgitim()) {
+    overTitleEl.textContent = "ders " + currentLessonNo + " bitti";
+    overScoreRow.classList.add("hidden");
+    overBestRow.classList.add("hidden");
+    statsEndGame(score, "ders " + currentLessonNo);
+    statusEl.textContent = "ders bitti — " + wpmOf(sStats) + " WPM";
+    if (lessonResultEl) {
+      lessonResultEl.classList.remove("hidden");
+      lessonResultEl.innerHTML = renderLessonResult();
+    }
+  } else if (isZamansiz()) {
     const ad = isDrill() ? "antrenman" : "pratik";
     overTitleEl.textContent = ad + " bitti";
     overScoreRow.classList.add("hidden");
@@ -1255,6 +1313,105 @@ const levelBoxEl   = document.getElementById("levelBox");
 const overLevelEl  = document.getElementById("overLevel");
 const drillTargetRow = document.getElementById("drillTargetRow");
 const drillTargetSel = document.getElementById("drillTarget");
+const lessonRowEl    = document.getElementById("lessonRow");
+const lessonListEl   = document.getElementById("lessonList");
+const lessonLabelEl  = document.getElementById("lessonLabel");
+const lessonResultEl = document.getElementById("lessonResult");
+const diffRowEl      = document.getElementById("diffRow");
+
+// ==========================================================================
+// Eğitim modu — ders listesi ve değerlendirme (Faz 12)
+// ==========================================================================
+
+function starStr(n, max) {
+  return "★".repeat(n) + "☆".repeat(Math.max(0, (max || 3) - n));
+}
+
+// Dersi başlat. Dersler baskısız oynanır ve HER ZAMAN "kolay" tempoda iner:
+// dersin zorluğu satır hızından değil, geçmek için gereken doğruluk/hız
+// eşiğinden gelir. Yeni başlayan bir oyuncu satırları okuyabilmelidir.
+function startLesson(no) {
+  currentLessonNo = no;
+  startGame("kolay");
+  const ders = lessonById(no);
+  statusEl.textContent = "ders " + no + (ders ? " — " + ders.title.toLowerCase() : "") +
+                         " · hazır olduğunda yazmaya başla";
+}
+
+function renderLessonList() {
+  if (!lessonListEl) return;
+  const data = loadLessons();
+  const dersler = visibleLessons();
+  const siradaki = currentLesson();
+
+  if (lessonLabelEl) {
+    lessonLabelEl.textContent = "müfredat · " + lessonTotalStars() + "/" +
+                                (dersler.length * 3) + " ★";
+  }
+
+  lessonListEl.innerHTML = dersler.map(l => {
+    const acik = l.no <= data.acilan;
+    const sonuc = data.sonuclar[String(l.no)] || null;
+    const yildiz = sonuc ? (sonuc.yildiz || 0) : 0;
+    const bitti = yildiz > 0;
+    const cls = ["lesson-card"];
+    if (!acik) cls.push("locked");
+    if (bitti) cls.push("done");
+    if (l.no === siradaki) cls.push("current");
+    // Kilitli ders de TIKLANABİLİR: kilit yol gösterir, duvar örmez.
+    // Zaten yazabilen biri ilk derslerde oyalanmak zorunda kalmamalı.
+    const ipucu = l.desc + (acik ? "" : " (kilitli — yine de deneyebilirsin)");
+    return '<button class="' + cls.join(" ") + '" data-lesson="' + l.no + '" title="' +
+             ipucu.replace(/"/g, "&quot;") + '">' +
+             '<span class="lesson-no">' + (acik ? l.no : "🔒") + '</span>' +
+             '<span class="lesson-name">' + l.title + '</span>' +
+             '<span class="lesson-stars">' + starStr(yildiz, 3) + '</span>' +
+             '<span class="lesson-goal">%' + l.acc + ' · ' + l.wpm + ' WPM</span>' +
+           '</button>';
+  }).join("");
+
+  lessonListEl.querySelectorAll(".lesson-card").forEach(btn => {
+    btn.addEventListener("click", () => startLesson(Number(btn.dataset.lesson)));
+  });
+}
+
+// Ders sonu değerlendirmesi. Yarım bırakılan ders (■ bitir ile erken çıkış)
+// kaydedilmez — 2 satır yazıp %100 doğrulukla geçmek mümkün olmamalı.
+function renderLessonResult() {
+  const ders = lessonById(currentLessonNo);
+  if (!ders) return "";
+  const wpm = wpmOf(sStats);
+  const acc = accuracyOf(sStats);
+
+  if (lessonLinesDone < LESSON_LINES) {
+    return '<div class="lesson-result half">' +
+             '<p class="lesson-verdict">ders yarım kaldı</p>' +
+             '<p class="lesson-detail">' + lessonLinesDone + '/' + LESSON_LINES +
+               ' satır — değerlendirme için dersi tamamlaman gerekiyor.</p>' +
+           '</div>';
+  }
+
+  const sonuc = recordLessonResult(currentLessonNo, wpm, acc);
+  const satir = (ok, etiket, deger, hedef) =>
+    '<p class="lesson-detail ' + (ok ? "ok" : "fail") + '">' +
+      (ok ? "✓" : "✗") + " " + etiket + ": <b>" + deger + "</b> (hedef " + hedef + ")</p>";
+
+  let html = '<div class="lesson-result ' + (sonuc.gecti ? "pass" : "fail") + '">';
+  html += '<p class="lesson-verdict">' +
+            (sonuc.gecti ? "ders geçildi " + starStr(sonuc.yildiz, 3) : "eşiğin altında kaldın") +
+          '</p>';
+  html += satir(sonuc.accOk, "doğruluk", "%" + acc, "%" + ders.acc);
+  html += satir(sonuc.wpmOk, "hız", wpm + " WPM", ders.wpm + " WPM");
+  if (sonuc.yeniAcilan) {
+    const y = lessonById(sonuc.yeniAcilan);
+    html += '<p class="lesson-unlock">🔓 Ders ' + sonuc.yeniAcilan +
+            (y ? " — " + y.title : "") + ' açıldı</p>';
+  } else if (!sonuc.gecti) {
+    html += '<p class="lesson-detail">tekrar dene — yıldızın düşmez, sadece yükselir.</p>';
+  }
+  html += '</div>';
+  return html;
+}
 
 if (drillTargetSel && typeof DRILL_TARGETS !== "undefined") {
   drillTargetSel.innerHTML = DRILL_TARGETS
@@ -1274,6 +1431,7 @@ function applyModeUI() {
   });
   if (modeSubEl) {
     modeSubEl.textContent =
+      isEgitim() ? "sıfırdan başla: dersler, eşikler, yıldızlar" :
       isGunluk() ? "herkes için aynı komutlar, aynı tuzaklar" :
       isDrill()  ? "parmakları izole et, kas hafızasını kur" :
       isPratik() ? "süre yok, ceza yok — sadece yaz ve ölç"
@@ -1282,6 +1440,17 @@ function applyModeUI() {
   // Zorluk satırı moda göre giydirilir: günlükte tek "Oyna" düğmesi kalır,
   // parmak modunda çalışma türüne, diğerlerinde zorluk/hız seçimine döner.
   const diffBtns = document.querySelectorAll(".diff-btn[data-diff]");
+  // Eğitimde zorluk seçimi yok: oyunu ders kartları başlatır, tempo hep kolay.
+  if (lessonRowEl) lessonRowEl.classList.toggle("hidden", !isEgitim());
+  if (diffLabelEl) diffLabelEl.classList.toggle("hidden", isEgitim());
+  if (diffRowEl)   diffRowEl.classList.toggle("hidden", isEgitim());
+  if (isEgitim()) {
+    renderLessonList();
+    if (menuBestRow) menuBestRow.classList.add("hidden");
+    if (drillTargetRow) drillTargetRow.classList.add("hidden");
+    return;
+  }
+
   if (isGunluk()) {
     if (diffLabelEl) diffLabelEl.textContent = "görevi başlat";
     diffBtns.forEach((b) => {
@@ -1323,7 +1492,10 @@ if (finishBtn) finishBtn.addEventListener("click", () => { if (running) endGame(
 gameMode = localStorage.getItem("sizmaMode") || "sizma";
 // "tekrar oyna" gerçekten yeniden başlatır: aynı mod, aynı zorluk, menüye uğramadan.
 // (Eskiden bu düğme de menüye dönüyordu — etiketi yanlıştı.)
-restartBtn.addEventListener("click", () => startGame(currentDiffName));
+restartBtn.addEventListener("click", () => {
+  if (isEgitim()) startLesson(currentLessonNo);   // aynı dersi baştan
+  else startGame(currentDiffName);
+});
 // Menüye dönüş ayrı düğmede
 const menuBtn = document.getElementById("menuBtn");
 if (menuBtn) menuBtn.addEventListener("click", showMenu);
