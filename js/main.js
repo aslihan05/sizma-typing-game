@@ -1149,7 +1149,50 @@ function resetGame() {
 // Seçilen zorlukla oyunu başlat
 let currentDiffName = "orta";
 let levelAtStart = 1;      // oyun başındaki seviye (atlama tespiti için)
+
+// --- Dokunmatik uyarısı ---
+// Oyun fiziksel klavye ister. Tarayıcı "klavye takılı mı" diye soramaz; en
+// yakın ipucu işaretçi türüdür (coarse = parmak). Klavyeli tablet de coarse
+// görünür, o yüzden bu bir ENGEL değil UYARI: geçilebilir ve seçim hatırlanır.
+// Ekran genişliğine BAKMIYORUZ — komut sarmalayıcısı (.cmd-wrap) hiç küçülmez,
+// yani komut dar ekranda da tam görünür; kırpılan yalnızca gürültüdür.
+const KEYBOARD_OK_KEY = "sizmaKeyboardOK";
+const touchNoticeEl = document.getElementById("touchNotice");
+let bekleyenDiffKey = null;   // uyarı yüzünden ertelenen başlatma
+
+function dokunmatikUyarisiGerekli() {
+  if (localStorage.getItem(KEYBOARD_OK_KEY)) return false;
+  return window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+}
+
+function showTouchNotice() {
+  menuEl.classList.add("hidden");
+  if (touchNoticeEl) touchNoticeEl.classList.remove("hidden");
+}
+
+const touchBackBtn = document.getElementById("touchBackBtn");
+if (touchBackBtn) {
+  touchBackBtn.addEventListener("click", () => {
+    if (touchNoticeEl) touchNoticeEl.classList.add("hidden");
+    showMenu();
+  });
+}
+const touchAnywayBtn = document.getElementById("touchAnywayBtn");
+if (touchAnywayBtn) {
+  touchAnywayBtn.addEventListener("click", () => {
+    localStorage.setItem(KEYBOARD_OK_KEY, "1");   // bir daha sorma
+    if (touchNoticeEl) touchNoticeEl.classList.add("hidden");
+    startGame(bekleyenDiffKey || currentDiffName);
+  });
+}
+
 function startGame(diffKey) {
+  // Dokunmatik cihazda önce uyar; oyuncu "klavyem var" derse buraya döneriz.
+  if (dokunmatikUyarisiGerekli()) {
+    bekleyenDiffKey = diffKey;
+    showTouchNotice();
+    return;
+  }
   // Günlük görevde herkes aynı komut/tuzak dizisini görsün diye Math.random
   // günün tarihinden türeyen sabit tohumlu üretece bağlanır. Diğer modlarda
   // gerçek rastgeleliğe geri dönülür (endGame de ayrıca geri alır).

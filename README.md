@@ -92,8 +92,14 @@ tablosu, rozetler, ders ilerlemesi) tek bir `sizma-data.json` dosyasına indirir
 
 **→ [aslihan05.github.io/sizma-typing-game](https://aslihan05.github.io/sizma-typing-game/)**
 
-Kurulum gerekmez, tarayıcıda açılır. Fiziksel klavye gerekir — oyun 10 parmak
-öğretmek için tasarlandı, dokunmatik ekranda oynanmaz.
+Kurulum gerekmez, tarayıcıda açılır.
+
+**Oynamak için fiziksel klavye gerekir.** Dokunmatik bir cihazda oyunu
+başlatmaya çalışırsan bir uyarı çıkar; klavyeli tablet kullanıyorsan
+"klavyem var, devam et" ile geçebilirsin (seçim hatırlanır).
+
+Telefon ve tabletlerde **istatistikler, rozetler, ders listesi, ayarlar ve
+veri dışa/içe aktarma** sorunsuz çalışır — ilerlemene her yerden bakabilirsin.
 
 ### Uygulama olarak kurmak
 

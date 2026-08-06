@@ -99,6 +99,25 @@
         <button class="link-btn" id="settingsBtn">⚙️ ayarlar</button>
       </div>
 
+      <!-- Dokunmatik uyarısı: oyun fiziksel klavye ister.
+           Engel değil, uyarı — klavyeli tablette oynanabilsin diye geçilebilir. -->
+      <div class="overlay hidden" id="touchNotice">
+        <h2 class="over-title">klavye gerekiyor</h2>
+        <p class="touch-text">
+          SIZMA 10 parmak yazmayı öğretmek için tasarlandı; oynamak için
+          <b>fiziksel klavye</b> gerekir. Dokunmatik ekranda iki başparmakla
+          oynamak oyunun amacını boşa çıkarır.
+        </p>
+        <p class="touch-text dim">
+          Klavyesiz de <b>istatistiklerine, rozetlerine ve ders ilerlemene</b>
+          bakabilir, verini dışa/içe aktarabilirsin.
+        </p>
+        <div class="menu-btns">
+          <button class="diff-btn" id="touchBackBtn">menüye dön</button>
+          <button class="link-btn" id="touchAnywayBtn">klavyem var, devam et</button>
+        </div>
+      </div>
+
       <!-- İstatistik paneli (tüm oyunların birikimi) -->
       <div class="overlay hidden" id="statsPanel">
         <h2 class="over-title">analiz</h2>
@@ -228,6 +247,16 @@
         console.info("Service worker kaydedilemedi (yerel dosya olarak açılmış olabilir):", e.message);
       });
     });
+  }
+
+  // Kalıcı depolama izni: tüm ilerleme localStorage'da ve sunucuda yedeği yok.
+  // Bu istek olmadan tarayıcı, disk sıkıştığında site verisini silebilir.
+  // Chrome genelde siteyi PWA olarak kuranlara ya da düzenli ziyaretçilere
+  // otomatik onay verir; desteklemeyen tarayıcıda sessizce atlanır.
+  if (navigator.storage && navigator.storage.persist) {
+    navigator.storage.persisted().then((zaten) => {
+      if (!zaten) navigator.storage.persist();
+    }).catch(() => {});
   }
 </script>
 </body>

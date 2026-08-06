@@ -1130,6 +1130,77 @@ body {
 }
 
 /* ============================================================
+   Dokunmatik uyarısı
+   ============================================================ */
+.touch-text {
+  max-width: 40ch;
+  font-size: calc(11.5px * var(--font-scale));
+  line-height: 1.6;
+  color: var(--color-text);
+}
+.touch-text.dim { color: var(--color-noise); }
+.touch-text b { color: var(--color-primary); }
+
+/* ============================================================
+   Dar ekran düzeni
+   ------------------------------------------------------------
+   Oyunun kendisi fiziksel klavye ister (bkz. #touchNotice), ama menü,
+   analiz paneli, rozetler ve ders listesi telefonda da kullanılabilir
+   olmalı — oyuncu ilerlemesine her yerden bakabilsin.
+
+   Not: inen satırların dar ekranda taşması sorun DEĞİL; .cmd-wrap hiç
+   küçülmediği için komut hep görünür, kırpılan yalnızca gürültüdür.
+   ============================================================ */
+@media (max-width: 700px) {
+  body {
+    padding: 6px 8px;
+    /* 100vh mobil tarayıcılarda adres çubuğunun altına taşar */
+    height: 100dvh;
+  }
+
+  .app { max-height: calc(100dvh - 12px); }
+  .terminal { min-height: 220px; }
+  .term-header { padding: 6px 9px; }
+
+  /* Paneller taşarsa kaydırılabilsin (menü, analiz, ayarlar, ders listesi) */
+  .overlay {
+    padding: 12px 10px;
+    gap: 10px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Düğmeler tek satıra sığmıyor → alt alta sarsın */
+  .menu-btns {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  /* 10 parmak rehberi: 12 tuşluk sıra 343 px'e sığsın diye tuşlar küçülür.
+     Aynı .key stili analiz panelindeki ısı haritasında da kullanılıyor. */
+  .key { width: 25px; height: 22px; font-size: calc(9.5px * var(--font-scale)); }
+  .key-row { gap: 2px; }
+  .keyboard { padding: 5px 6px 6px; }
+
+  .lesson-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    max-height: 44vh;
+  }
+
+  /* Analiz tabloları ve rozet ızgarası dar ekranda okunur kalsın */
+  .badge-grid { grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 8px; }
+  .stats-body { font-size: calc(10.5px * var(--font-scale)); }
+  .game-title { font-size: calc(34px * var(--font-scale)); }
+}
+
+/* Çok dar telefonlar */
+@media (max-width: 400px) {
+  .key { width: 21px; height: 20px; }
+  .lesson-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* ============================================================
    Faz 12: Eğitim modu — müfredat
    ============================================================ */
 .lesson-grid {
