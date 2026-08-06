@@ -33,7 +33,6 @@
       <span class="term-title">root@hedef:~#</span>
       <span style="display:flex;align-items:center;gap:8px;">
         <button class="pause-btn" id="muteBtn" title="Sesi kapat">🔊</button>
-        <button class="pause-btn hidden" id="softKbdBtn" title="Ekran klavyesini aç">⌨</button>
         <button class="pause-btn hidden" id="finishBtn" title="Bitir ve raporu gör">■ bitir</button>
         <button class="pause-btn hidden" id="pauseBtn" title="Duraklat (Esc)">⏸</button>
         <span class="term-clock" id="clock">00:00</span>
@@ -116,15 +115,9 @@
         <div class="menu-btns">
           <button class="diff-btn" id="touchBackBtn">menüye dön</button>
           <button class="link-btn" id="touchAnywayBtn">klavyem var, devam et</button>
-          <button class="link-btn" id="touchSoftBtn">⌨ ekran klavyesiyle oyna</button>
+          <button class="link-btn" id="touchSoftBtn">⌨ ekrandaki klavyeyle oyna</button>
         </div>
       </div>
-
-      <!-- Dokunmatik giriş: yazılım klavyesini açabilmek için odaklanılacak
-           görünmez bir alan gerekir. display:none OLAMAZ — odaklanılamaz. -->
-      <input id="softInput" type="text" inputmode="text"
-             autocomplete="off" autocorrect="off" autocapitalize="none"
-             spellcheck="false" aria-hidden="true" tabindex="-1" />
 
       <!-- İstatistik paneli (tüm oyunların birikimi) -->
       <div class="overlay hidden" id="statsPanel">
@@ -230,6 +223,14 @@
         <option value="TR-F">TR-F</option>
         <option value="EN">EN</option>
       </select>
+    </div>
+
+    <!-- Dokunmatik denetim tuşları: yalnızca ekran klavyesi modunda görünür.
+         renderKeyboard() her çizimde .key-row'ları siler, bu yüzden bu satır
+         ayrı bir sınıf taşır; sona düşmesi için order kullanılıyor. -->
+    <div class="kbd-controls hidden" id="kbdControls">
+      <button class="kbd-ctrl" id="kbdBackspace" title="Son harfi sil">⌫ sil</button>
+      <button class="kbd-ctrl" id="kbdEscape" title="Yazımı iptal et">⎋ iptal</button>
     </div>
   </section>
 

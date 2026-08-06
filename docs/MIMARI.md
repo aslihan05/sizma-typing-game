@@ -100,22 +100,27 @@ Kurallar:
 Oyun mantığı girişin nereden geldiğini bilmez. İki kaynak buraya bağlanır:
 
 1. **Fiziksel klavye** — `document` üzerindeki `keydown`.
-2. **Yazılım klavyesi** — görünmez bir `<input id="softInput">`. Tarayıcı,
-   odaklanılmış bir metin alanı olmadan ekran klavyesini açmaz; bu yüzden
-   alan `display:none` **olamaz** (odaklanılamaz), bunun yerine `opacity:0`
-   ile gizlenir. Yazılanlar `input` olayından okunur.
+2. **Ekrandaki klavyeye dokunma** — `#keyboardSection` üzerinde devredilmiş
+   tek bir `click` dinleyicisi. Her tuşun `dataset.key`'i vardır (bkz.
+   `js/keyboard.js`), boşluk çubuğu dahil.
 
-`keydown` yerine `input` kullanılmasının sebebi: Android klavyeleri (Gboard)
-yazılan harf için `e.key` vermez, `keyCode 229` gönderir. Silme olayının
-yakalanabilmesi için alanda hep silinecek bir gövde tutulur (`SOFT_DOLGU`) —
-alan boşken tarayıcı "geriye sil"i hiç bildirmez.
+İşletim sisteminin yazılım klavyesi **bilerek açılmaz.** Denenen ilk yol
+görünmez bir `<input>` odaklayıp `input` olaylarını okumaktı; çalışıyordu ama
+klavye ekranın yarısını kaplayıp oyun alanını kapatıyordu. Oyunun zaten
+çizdiği 10 parmak rehberini giriş aygıtına çevirmek hem yeri korur, hem parmak
+renklerini ve sıradaki tuş vurgusunu dokunmatikte de görünür tutar, hem de
+düzeni cihazın klavyesine değil oyuncunun seçimine bağlar.
 
-Gizli alan **yalnızca** oyuncu açıkça "ekran klavyesiyle oyna" dediğinde
-devreye girer (`sizmaSoftKeyboard`). Sebebi: alan odaklıyken fiziksel bir
-klavyede hem `keydown` hem `input` tetiklenir ve her harf iki kez işlenirdi.
-Ayrıca `keydown` işleyicisi `e.target === softInput` olan olayları yok sayar —
-bazı Android klavyeleri Backspace için iki olayı birden gönderiyor ve tek
-dokunuşta iki harf siliniyordu.
+Dokunma girişi yalnızca oyuncu açıkça "ekrandaki klavyeyle oyna" dediğinde
+etkinleşir (`sizmaSoftKeyboard`); aksi halde fare kullanıcısı tuşlara yanlışlıkla
+tıklayınca yazmış olurdu. Mod açıkken `.keyboard` elemanı `.tappable` sınıfını
+alır ve klavyenin altında `⌫ sil` / `⎋ iptal` düğmeleri belirir.
+
+**CSS tuzağı:** `.keyboard.tappable .key` kuralı (0,3,0) özgüllükte olduğu için
+`.key.space-key` (0,2,0) genişliğini eziyor ve boşluk çubuğunu normal tuş
+boyutuna düşürüyordu. Genişlik kuralı bu yüzden `:not(.space-key)` ile
+sınırlanır. Tuş genişliği de sabit değil `clamp()` ile ekrana bağlıdır — sabit
+27px, 360px'lik telefonlarda en kalabalık sırayı (12 tuş + girinti) taşırıyordu.
 
 - `refreshCandidates()` her karede değil, yalnızca satır listesi değiştiğinde
   (`candidatesDirty`) çalışır. Her karede çalışırken 60 fps × ~90 DOM işlemi

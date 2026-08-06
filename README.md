@@ -100,11 +100,17 @@ Kurulum gerekmez, tarayıcıda açılır.
 - **menüye dön** — klavyesiz de istatistiklerine, rozetlerine ve ders
   ilerlemene bakabilirsin
 - **klavyem var, devam et** — klavyeli tablet için
-- **⌨ ekran klavyesiyle oyna** — telefonun yazılım klavyesiyle oynanır
+- **⌨ ekrandaki klavyeyle oyna** — oyunun kendi 10 parmak rehberi giriş
+  aygıtına dönüşür; tuşlara dokunarak yazarsın
 
-Seçim hatırlanır. Ekran klavyesi modu çalışır ama **10 parmak öğrenmek için
-uygun değildir**: klavye ekranın yarısını kaplar ve iki başparmakla yazılır.
-Oyunun asıl amacı için gerçek bir klavye kullan.
+Seçim hatırlanır. Dokunmatik modda işletim sisteminin klavyesi **açılmaz** —
+oyun alanı kapanmaz, parmak renkleri ve sıradaki tuş vurgusu görünür kalır ve
+düzen senin seçtiğin düzendir (TR-Q / TR-F / EN), cihazınkine bağlı değil.
+Klavyenin altında **⌫ sil** ve **⎋ iptal** tuşları belirir.
+
+Yine de: dokunmatik mod **10 parmak öğrenmek için uygun değildir**, tek
+parmakla dokunarak yazmak kas hafızası kurmaz. Oyunun asıl amacı için gerçek
+bir klavye kullan.
 
 Telefon ve tabletlerde **istatistikler, rozetler, ders listesi, ayarlar ve
 veri dışa/içe aktarma** sorunsuz çalışır — ilerlemene her yerden bakabilirsin.

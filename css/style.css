@@ -1141,26 +1141,49 @@ body {
 .touch-text.dim { color: var(--color-noise); }
 .touch-text b { color: var(--color-primary); }
 
-/* Dokunmatik giriş alanı: görünmez ama ODAKLANILABİLİR olmalı.
-   display:none ya da visibility:hidden kullanılamaz — o durumda focus()
-   çalışmaz ve yazılım klavyesi hiç açılmaz. */
-#softInput {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  border: 0;
-  outline: none;
-  opacity: 0;
-  z-index: -1;
-  /* iOS: 16px'ten küçük yazı boyutu odaklanınca sayfayı yakınlaştırır */
-  font-size: 16px;
-  background: transparent;
-  color: transparent;
-  caret-color: transparent;
+/* --- Dokunmatik: ekrandaki klavye giriş aygıtı olur ---
+   İşletim sisteminin klavyesi açılmaz; oyuncu doğrudan 10 parmak rehberine
+   dokunur. Böylece oyun alanı kapanmaz, parmak renkleri görünür kalır. */
+.keyboard.tappable .key {
+  cursor: pointer;
+  /* Çift dokunuşta yakınlaştırmayı ve ~300 ms tıklama gecikmesini kapatır */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  height: 30px;                       /* parmakla basılabilecek yükseklik */
+  font-size: calc(11px * var(--font-scale));
 }
+/* Genişlik ekrana göre: en kalabalık sıra 12 tuş + satır girintisi (8px) +
+   aralıklar. Sabit bir değer 360px'lik telefonlarda satırı taşırıyordu.
+   :not(.space-key) şart — yoksa bu kural boşluk çubuğunun 200px'ini ezip
+   onu da normal tuş boyutuna düşürüyor. */
+.keyboard.tappable .key:not(.space-key) {
+  width: clamp(20px, calc((100vw - 70px) / 12), 30px);
+}
+.keyboard.tappable .key.space-key { height: 30px; }
+.keyboard.tappable .key:active {
+  background: rgba(var(--rgb-primary), 0.25);
+  transform: scale(0.94);
+}
+
+.kbd-controls {
+  order: 99;            /* renderKeyboard satırları sona eklediği için */
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+.kbd-ctrl {
+  font-family: inherit;
+  font-size: calc(11px * var(--font-scale));
+  background: rgba(var(--rgb-primary), 0.08);
+  color: var(--color-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 7px 16px;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.kbd-ctrl:active { background: rgba(var(--rgb-primary), 0.22); }
 
 /* ============================================================
    Dar ekran düzeni
