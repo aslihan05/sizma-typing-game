@@ -6,7 +6,7 @@
 //
 // SÜRÜM: Dosyalardan biri değiştiğinde bu numarayı artırın. Eski önbellek
 // activate sırasında silinir; aksi halde kullanıcı güncellemeyi hiç görmez.
-const SURUM = "sizma-v2";
+const SURUM = "sizma-v4";
 
 // Yalnızca yerel dosyalar. Google Fonts bilerek dışarıda: üçüncü taraf isteği
 // önbelleğe alınırsa çevrimdışıyken sessizce başarısız olabiliyor ve açılışı

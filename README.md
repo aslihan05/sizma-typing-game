@@ -94,9 +94,17 @@ tablosu, rozetler, ders ilerlemesi) tek bir `sizma-data.json` dosyasına indirir
 
 Kurulum gerekmez, tarayıcıda açılır.
 
-**Oynamak için fiziksel klavye gerekir.** Dokunmatik bir cihazda oyunu
-başlatmaya çalışırsan bir uyarı çıkar; klavyeli tablet kullanıyorsan
-"klavyem var, devam et" ile geçebilirsin (seçim hatırlanır).
+**Oyun fiziksel klavye için tasarlandı.** Dokunmatik bir cihazda başlatmaya
+çalışırsan bir uyarı çıkar ve üç seçenek sunar:
+
+- **menüye dön** — klavyesiz de istatistiklerine, rozetlerine ve ders
+  ilerlemene bakabilirsin
+- **klavyem var, devam et** — klavyeli tablet için
+- **⌨ ekran klavyesiyle oyna** — telefonun yazılım klavyesiyle oynanır
+
+Seçim hatırlanır. Ekran klavyesi modu çalışır ama **10 parmak öğrenmek için
+uygun değildir**: klavye ekranın yarısını kaplar ve iki başparmakla yazılır.
+Oyunun asıl amacı için gerçek bir klavye kullan.
 
 Telefon ve tabletlerde **istatistikler, rozetler, ders listesi, ayarlar ve
 veri dışa/içe aktarma** sorunsuz çalışır — ilerlemene her yerden bakabilirsin.

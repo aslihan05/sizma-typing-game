@@ -95,6 +95,28 @@ Kurallar:
 - `Backspace` son harfi geri alır, `Esc` yazımı iptal eder.
 - Aday kalmadığında tampon kendiliğinden sıfırlanır — aksi halde yazdığın satır
   ekrandan çıkınca klavye "ölü" kalıyordu.
+### Tek giriş yolu: `handleTypedKey(tus)`
+
+Oyun mantığı girişin nereden geldiğini bilmez. İki kaynak buraya bağlanır:
+
+1. **Fiziksel klavye** — `document` üzerindeki `keydown`.
+2. **Yazılım klavyesi** — görünmez bir `<input id="softInput">`. Tarayıcı,
+   odaklanılmış bir metin alanı olmadan ekran klavyesini açmaz; bu yüzden
+   alan `display:none` **olamaz** (odaklanılamaz), bunun yerine `opacity:0`
+   ile gizlenir. Yazılanlar `input` olayından okunur.
+
+`keydown` yerine `input` kullanılmasının sebebi: Android klavyeleri (Gboard)
+yazılan harf için `e.key` vermez, `keyCode 229` gönderir. Silme olayının
+yakalanabilmesi için alanda hep silinecek bir gövde tutulur (`SOFT_DOLGU`) —
+alan boşken tarayıcı "geriye sil"i hiç bildirmez.
+
+Gizli alan **yalnızca** oyuncu açıkça "ekran klavyesiyle oyna" dediğinde
+devreye girer (`sizmaSoftKeyboard`). Sebebi: alan odaklıyken fiziksel bir
+klavyede hem `keydown` hem `input` tetiklenir ve her harf iki kez işlenirdi.
+Ayrıca `keydown` işleyicisi `e.target === softInput` olan olayları yok sayar —
+bazı Android klavyeleri Backspace için iki olayı birden gönderiyor ve tek
+dokunuşta iki harf siliniyordu.
+
 - `refreshCandidates()` her karede değil, yalnızca satır listesi değiştiğinde
   (`candidatesDirty`) çalışır. Her karede çalışırken 60 fps × ~90 DOM işlemi
   yapıyor ve yazarken takılmalara yol açıyordu.
@@ -134,6 +156,8 @@ diziyi görsün.
 | `sizmaBest` | `BEST_KEY` | En iyi skor |
 | `sizmaTutorialSeen` | `TUTORIAL_KEY` | Öğretici gösterildi mi |
 | `sizmaMute` | `AUDIO_MUTE_KEY` | Ses kapalı mı |
+| `sizmaKeyboardOK` | `KEYBOARD_OK_KEY` | Dokunmatik uyarısı geçildi mi |
+| `sizmaSoftKeyboard` | `SOFT_KEY` | Ekran klavyesiyle oynanıyor mu |
 | `sizmaLayout`, `sizmaTheme`, `sizmaFontSize`, `sizmaMode`, `sizmaDrillTarget` | — | Tercihler |
 
 **Dışa/içe aktarma** (`exportData()` / `importData()`) şunları taşır:

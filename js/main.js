@@ -1042,29 +1042,22 @@ function completeCommand(s) {
   refreshCandidates();
 }
 
-document.addEventListener("keydown", (e) => {
-  if (e.ctrlKey || e.altKey || e.metaKey) return;
-
-  // Escape: duraklat / devam et / yazımı iptal et (duruma göre)
-  if (e.key === "Escape") {
-    if (paused) { togglePause(); return; }                 // duraklatılmış → devam et
-    if (running && typedBuf) { clearTyping(); return; }    // yazıyordu → iptal
-    if (running) { togglePause(); return; }                // boştaysa → duraklat
-    return;
-  }
-
+// Giriş işleme — TEK YOL.
+// Hem fiziksel klavye (keydown) hem dokunmatik cihazlardaki yazılım klavyesi
+// (gizli input, bkz. softInput) buraya bağlanır; oyun mantığı girişin nereden
+// geldiğini bilmez. `tus` ya tek bir karakterdir ya da "Backspace".
+function handleTypedKey(tus) {
   if (!running || paused) return;                          // menü/sonuç/duraklama
 
   // İlk yazılabilir tuş oyunu başlatır. Tuşu tüketmiyoruz — aynı basış
   // normal akışta işlenmeye devam eder, yani ilk harfin de sayılır.
-  if (waitingStart && e.key.length === 1) {
+  if (waitingStart && tus.length === 1) {
     waitingStart = false;
     statusEl.textContent = "sızma başladı";
   }
 
   // Backspace: son harfi geri al (tüm yazımı silmez)
-  if (e.key === "Backspace") {
-    e.preventDefault();                                    // tarayıcı geri gitmesin
+  if (tus === "Backspace") {
     if (typedBuf) {
       typedBuf = typedBuf.slice(0, -1);
       refreshCandidates();
@@ -1072,9 +1065,8 @@ document.addEventListener("keydown", (e) => {
     return;
   }
 
-  if (e.key.length !== 1) return;                          // sadece yazılabilir karakter
-  if (e.key === " ") e.preventDefault();                   // boşluk sayfayı kaydırmasın
-  const pressed = e.key.toLocaleLowerCase("tr");           // Türkçe-duyarlı küçük harf
+  if (tus.length !== 1) return;                            // sadece yazılabilir karakter
+  const pressed = tus.toLocaleLowerCase("tr");             // Türkçe-duyarlı küçük harf
   if (typeof pressKeyAnim === "function") pressKeyAnim(pressed);
 
   // --- Analiz kaydı: bu basış doğru mu? ---
@@ -1111,6 +1103,31 @@ document.addEventListener("keydown", (e) => {
   for (const c of candidates) {
     if (c.command === typedBuf) { completeCommand(c); break; }
   }
+}
+
+document.addEventListener("keydown", (e) => {
+  if (e.ctrlKey || e.altKey || e.metaKey) return;
+
+  // Gizli alan odaklıysa giriş TEK yoldan, input olayından gelir. Aksi halde
+  // aynı basış iki kez işlenir: bazı Android klavyeleri Backspace için hem
+  // keydown hem input gönderiyor, bu da tek dokunuşta iki harf siliyordu.
+  if (e.target === softInput) return;
+
+  // Escape: duraklat / devam et / yazımı iptal et (duruma göre)
+  if (e.key === "Escape") {
+    if (paused) { togglePause(); return; }                 // duraklatılmış → devam et
+    if (running && typedBuf) { clearTyping(); return; }    // yazıyordu → iptal
+    if (running) { togglePause(); return; }                // boştaysa → duraklat
+    return;
+  }
+
+  if (!running || paused) return;
+
+  // Tarayıcının kendi davranışını engelle: Backspace geri gitmesin,
+  // boşluk sayfayı kaydırmasın.
+  if (e.key === "Backspace" || e.key === " ") e.preventDefault();
+
+  handleTypedKey(e.key);
 });
 
 // === Oyun akışı: menü → oyna → sonuç ===
@@ -1186,6 +1203,83 @@ if (touchAnywayBtn) {
   });
 }
 
+// ==========================================================================
+// Ekran klavyesiyle oynama
+// ==========================================================================
+// Telefonda fiziksel klavye yok ve tarayıcı, odaklanılmış bir metin alanı
+// olmadan yazılım klavyesini AÇMAZ. Bu yüzden görünmez bir <input> tutuluyor;
+// oyuncu ona odaklanınca klavye açılır, yazdıkları input olaylarıyla okunup
+// handleTypedKey()'e aktarılır.
+//
+// Neden keydown değil: Android klavyeleri (Gboard) yazılan harf için
+// e.key vermez, keyCode 229 gönderir. Güvenilir yol input olayıdır.
+//
+// Neden ayrı bir mod: Fiziksel klavyeli bir tablette input odaklıyken hem
+// keydown hem input tetiklenir ve her harf İKİ KEZ işlenirdi. O yüzden gizli
+// alan yalnızca oyuncu açıkça "ekran klavyesiyle oyna" dediğinde devreye girer.
+const SOFT_KEY = "sizmaSoftKeyboard";
+const softInput = document.getElementById("softInput");
+const softKbdBtn = document.getElementById("softKbdBtn");
+
+// Silme olayının yakalanabilmesi için alanda hep silinecek bir gövde durmalı;
+// alan boşken tarayıcı "geriye sil"i hiç bildirmez.
+const SOFT_DOLGU = "      ";
+
+function softAktif() { return localStorage.getItem(SOFT_KEY) === "1"; }
+
+function softSifirla() {
+  if (!softInput) return;
+  softInput.value = SOFT_DOLGU;
+  try {
+    softInput.setSelectionRange(SOFT_DOLGU.length, SOFT_DOLGU.length);
+  } catch (e) {}
+}
+
+// Klavyeyi aç. Tarayıcılar focus()'u yalnızca kullanıcı hareketi içinde
+// kabul eder — bu yüzden hep bir tıklama/dokunma işleyicisinden çağrılır.
+function softKlavyeyiAc() {
+  if (!softInput) return;
+  softSifirla();
+  softInput.focus();
+}
+
+if (softInput) {
+  softInput.addEventListener("input", () => {
+    const v = softInput.value;
+    if (v.length > SOFT_DOLGU.length) {
+      // Eklenen karakterler sonda: imleci her seferinde sona aldığımız için.
+      // Kelime tahmini birden çok harfi tek seferde gönderebilir; hepsi
+      // sırayla işlenir.
+      for (const ch of v.slice(SOFT_DOLGU.length)) handleTypedKey(ch);
+    } else if (v.length < SOFT_DOLGU.length) {
+      handleTypedKey("Backspace");
+    }
+    softSifirla();
+  });
+
+  // Oyun sürerken odak kaçarsa (kullanıcı ekrana dokundu) klavye kapanır;
+  // ⌨ düğmesi geri açar. Odağı zorla geri almıyoruz — kullanıcı klavyeyi
+  // bilerek kapatmış olabilir.
+  softInput.addEventListener("blur", () => {
+    if (running && softAktif() && softKbdBtn) softKbdBtn.classList.remove("hidden");
+  });
+}
+
+if (softKbdBtn) {
+  softKbdBtn.addEventListener("click", softKlavyeyiAc);
+}
+
+const touchSoftBtn = document.getElementById("touchSoftBtn");
+if (touchSoftBtn) {
+  touchSoftBtn.addEventListener("click", () => {
+    localStorage.setItem(KEYBOARD_OK_KEY, "1");
+    localStorage.setItem(SOFT_KEY, "1");
+    if (touchNoticeEl) touchNoticeEl.classList.add("hidden");
+    startGame(bekleyenDiffKey || currentDiffName);
+    softKlavyeyiAc();          // aynı dokunuşun içinde: tarayıcı izin verir
+  });
+}
+
 function startGame(diffKey) {
   // Dokunmatik cihazda önce uyar; oyuncu "klavyem var" derse buraya döneriz.
   if (dokunmatikUyarisiGerekli()) {
@@ -1219,6 +1313,10 @@ function startGame(diffKey) {
   // "bitir" her modda görünür: baskısız modlarda oyunun tek bitiş yolu,
   // sızma modunda ise istediğin an çıkıp sonucu görmeni sağlar.
   if (finishBtn) finishBtn.classList.remove("hidden");
+  // Ekran klavyesi modunda ⌨ düğmesi görünür ve klavye hemen açılır.
+  // (startGame bir tıklama işleyicisinden çağrıldığı için focus'a izin verilir.)
+  if (softKbdBtn) softKbdBtn.classList.toggle("hidden", !softAktif());
+  if (softAktif()) softKlavyeyiAc();
   requestAnimationFrame(gameLoop);
 }
 
@@ -1231,6 +1329,9 @@ function endGame() {
   if (pauseBtn) pauseBtn.classList.add("hidden");
   if (finishBtn) finishBtn.classList.add("hidden");
   if (pauseOverlay) pauseOverlay.classList.add("hidden");
+  // Oyun bitti: ekran klavyesi kapansın, sonuç ekranı görünür olsun
+  if (softKbdBtn) softKbdBtn.classList.add("hidden");
+  if (softInput) softInput.blur();
   clearTyping();
   if (typeof highlightNextKey === "function") highlightNextKey(null);
   updateInputDisplay();

@@ -1141,6 +1141,27 @@ body {
 .touch-text.dim { color: var(--color-noise); }
 .touch-text b { color: var(--color-primary); }
 
+/* Dokunmatik giriş alanı: görünmez ama ODAKLANILABİLİR olmalı.
+   display:none ya da visibility:hidden kullanılamaz — o durumda focus()
+   çalışmaz ve yazılım klavyesi hiç açılmaz. */
+#softInput {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  outline: none;
+  opacity: 0;
+  z-index: -1;
+  /* iOS: 16px'ten küçük yazı boyutu odaklanınca sayfayı yakınlaştırır */
+  font-size: 16px;
+  background: transparent;
+  color: transparent;
+  caret-color: transparent;
+}
+
 /* ============================================================
    Dar ekran düzeni
    ------------------------------------------------------------
