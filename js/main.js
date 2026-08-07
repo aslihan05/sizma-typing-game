@@ -701,7 +701,7 @@ function gameLoop(timestamp) {
   const vfxAcik = !isZamansiz();
   if (streak !== lastStreak) {
     if (typeof updateMatrixSpeed === "function") updateMatrixSpeed(vfxAcik ? streak : 0);
-    if (streak >= 10 && vfxAcik) {
+    if (streak >= BALANCE.comboShowStreak && vfxAcik) {
       if (comboDisplayEl) {
         comboDisplayEl.textContent = "🔥 " + streak + "x KOMBO!";
         comboDisplayEl.classList.remove("hidden");
@@ -718,7 +718,7 @@ function gameLoop(timestamp) {
   }
 
   // Overdrive ve Boss Alarm: seriden bağımsız, her karede duruma göre güncelle
-  const wantOverdrive = streak >= 20 && !bossActive && vfxAcik;
+  const wantOverdrive = streak >= BALANCE.overdriveStreak && !bossActive && vfxAcik;
   const hasOverdrive = document.body.classList.contains("theme-overdrive");
   if (wantOverdrive !== hasOverdrive) {
     document.body.classList.toggle("theme-overdrive", wantOverdrive);

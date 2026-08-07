@@ -27,6 +27,15 @@ const BALANCE = {
   splitterDelay: 22,
   mutatingDelay: 34,
   bombDelay: 30,
+
+  // Seri eşikleri. Seri, ekrana İNEN komut sayısıyla sınırlı — ne kadar hızlı
+  // yazarsan yaz, dakikada inenden fazlasını tamamlayamazsın. Eski 20 eşiği
+  // bu yüzden ulaşılamıyordu: kolayda dakikada 4.2 komut iniyor, yani 20 seri
+  // en az ~4 dk 45 sn sürüyordu — 80 saniyelik bir oyunda imkânsız.
+  // comboShowStreak, puan çarpanının başladığı yer olan 3'e denk getirildi
+  // (çarpan: 1 + floor(seri/3) × 0.5), yani gösterge çarpan devreye girince çıkar.
+  comboShowStreak: 3,
+  overdriveStreak: 5,
 };
 
 // Süre ödülü formülü: timeRewardBase + (etkinUzunluk / targetCps)

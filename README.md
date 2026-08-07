@@ -13,9 +13,12 @@ Zaman senin canın. Doğru komut süre kazandırır, kaçan komut ve tuzaklar s�
 - **Ayıklama** — her satırda komut yok; saf gürültü satırları cezasızdır, asıl beceri işareti fark etmek.
 - **Harf harf doğrulama** — doğru harfler yeşil yanar, yazdığın satıra kilitlenirsin.
 - **Yanlış harfin cezası yoktur** — sadece ilerlemez. Amaç panik değil, doğru refleks.
-- **Seri (combo)** — art arda komut tamamladıkça puan çarpanı büyür. 10'da seri
-  göstergesi belirir, 20'de terminal **Overdrive**'a geçip renk değiştirir.
-  Bunlar skorun ödülü olduğu için Pratik / Parmak / Eğitim modlarında çıkmaz.
+- **Seri (combo)** — art arda komut tamamladıkça puan çarpanı büyür. 3'te seri
+  göstergesi belirir (çarpanın devreye girdiği yer), 5'te terminal
+  **Overdrive**'a geçip temanın vurgu rengine döner. Seriyi bozan şeyler:
+  tuzağa düşmek, komut kaçırmak, bomba patlaması/kaçması — **yanlış harf
+  bozmaz.** Overdrive boss sırasında kapanır ve Pratik / Parmak / Eğitim
+  modlarında hiç çıkmaz (skorun ödülü olduğu için).
 
 ### Düşmanlar
 
