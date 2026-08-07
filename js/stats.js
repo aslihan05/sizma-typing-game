@@ -47,25 +47,36 @@ let sStats = emptyStats();   // o anki oyun
 let lastKeyTime = 0;         // önceki tuşun zaman damgası (gecikme ölçümü)
 
 // --- localStorage yardımcıları ---
+// Yükleyicilerin ortak kuralı: depodaki veri BEKLENEN ŞEKİLDE DEĞİLSE boş
+// başlangıca dönülür. JSON.parse'ı try/catch'e almak yetmiyor — geçerli ama
+// yanlış türde bir JSON (`"metin"`, `42`) sessizce geçiyor ve kullanıldığı
+// yerde patlıyordu. Bozuk bir yedek dosyası içe aktarıldığında oyun sonu
+// akışı bu yüzden kalıcı olarak kırılıyordu (bkz. importData).
 function loadLifetime() {
   try {
     const raw = JSON.parse(localStorage.getItem(STATS_KEY));
-    return raw ? Object.assign(emptyStats(), raw) : emptyStats();
+    return raw && typeof raw === "object" && !Array.isArray(raw)
+      ? Object.assign(emptyStats(), raw)
+      : emptyStats();
   } catch (e) { return emptyStats(); }
 }
 function saveLifetime(s) {
   try { localStorage.setItem(STATS_KEY, JSON.stringify(s)); } catch (e) {}
 }
 function loadHistory() {
-  try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; }
-  catch (e) { return []; }
+  try {
+    const raw = JSON.parse(localStorage.getItem(HISTORY_KEY));
+    return Array.isArray(raw) ? raw : [];
+  } catch (e) { return []; }
 }
 function saveHistory(h) {
   try { localStorage.setItem(HISTORY_KEY, JSON.stringify(h)); } catch (e) {}
 }
 function loadLeaderboard() {
-  try { return JSON.parse(localStorage.getItem(LEADERBOARD_KEY)) || []; }
-  catch (e) { return []; }
+  try {
+    const raw = JSON.parse(localStorage.getItem(LEADERBOARD_KEY));
+    return Array.isArray(raw) ? raw : [];
+  } catch (e) { return []; }
 }
 function saveLeaderboard(lb) {
   try { localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(lb)); } catch (e) {}
@@ -716,27 +727,44 @@ function exportData() {
 }
 
 // JSON Dosyasından İçe Aktar
+// Dosya kullanıcıdan geliyor: yarım inmiş, elle düzenlenmiş ya da yanlışlıkla
+// seçilmiş başka bir .json olabilir. Eskiden içerik olduğu gibi depoya
+// yazılıyordu; geçerli ama yanlış türde bir alan (ör. history: "metin") oyunu
+// KALICI olarak kırıyordu — her oyun sonunda statsEndGame patlıyor, sonuç
+// ekranı hiç açılmıyordu ve tek çıkış "verileri sıfırla" oluyordu.
+// Artık her alan tek tek doğrulanıyor; şekli tutmayan alan sessizce atlanır,
+// tutan alanlar yine yüklenir (kısmen bozuk bir dosya tamamen boşa gitmesin).
+function nesneMi(v) {
+  return v && typeof v === "object" && !Array.isArray(v);
+}
+
 function importData(jsonString) {
+  let data;
   try {
-    const data = JSON.parse(jsonString);
-    if (data.stats) saveLifetime(data.stats);
-    if (data.history) {
-      try { localStorage.setItem(HISTORY_KEY, JSON.stringify(data.history)); } catch (e) {}
-    }
-    if (data.leaderboard) {
-      try { localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(data.leaderboard)); } catch (e) {}
-    }
-    if (data.badges && typeof saveBadges === "function") {
-      saveBadges(data.badges);
-    }
-    // Eski dosyalarda bu alan yok — olmaması hata değil, ders ilerlemesi
-    // dokunulmadan bırakılır.
-    if (data.lessons && typeof saveLessons === "function") {
-      saveLessons(data.lessons);
-    }
-    return true;
+    data = JSON.parse(jsonString);
   } catch (e) {
-    console.error("Veri içe aktarma hatası:", e);
+    console.error("Veri içe aktarma hatası: geçersiz JSON", e);
     return false;
   }
+  if (!nesneMi(data)) {
+    console.error("Veri içe aktarma hatası: beklenen biçim bir nesne");
+    return false;
+  }
+
+  let yuklenen = 0;
+  if (nesneMi(data.stats)) { saveLifetime(Object.assign(emptyStats(), data.stats)); yuklenen++; }
+  if (Array.isArray(data.history)) { saveHistory(data.history.slice(0, HISTORY_MAX)); yuklenen++; }
+  if (Array.isArray(data.leaderboard)) { saveLeaderboard(data.leaderboard.slice(0, 10)); yuklenen++; }
+  if (nesneMi(data.badges) && typeof saveBadges === "function") { saveBadges(data.badges); yuklenen++; }
+  // Eski dosyalarda bu alan yok — olmaması hata değil, ders ilerlemesi
+  // dokunulmadan bırakılır.
+  if (nesneMi(data.lessons) && typeof saveLessons === "function") { saveLessons(data.lessons); yuklenen++; }
+
+  // Hiçbir alan tanınmadıysa bu dosya bu oyunun yedeği değil — "başarılı"
+  // demek yanıltıcı olur, kullanıcı verisinin geldiğini sanır.
+  if (yuklenen === 0) {
+    console.error("Veri içe aktarma hatası: tanınan alan yok");
+    return false;
+  }
+  return true;
 }

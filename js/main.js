@@ -1355,6 +1355,11 @@ function startGame(diffKey) {
   gameoverEl.classList.add("hidden");
   statsPanelEl.classList.add("hidden");
   if (scoreClockContainer) scoreClockContainer.classList.remove("hidden");
+  // Baskısız modlarda skor gizlenir. Sonuç ekranı zaten gizliyor ("pratikte
+  // skor ve rekor anlamsız"), ama oyun boyunca saatin yanında duruyordu —
+  // ders ortasında öğrenciye anlamsız dediğimiz sayıyı göstermek tutarsızdı.
+  // Saat kalır: baskısız modlarda yukarı sayar ve kendi hızını görmen içindir.
+  if (scoreEl) scoreEl.classList.toggle("hidden", isZamansiz());
   if (termInputEl) termInputEl.classList.remove("hidden");
   // Seviye atlamayı yakalayabilmek için oyun ÖNCESİ seviyeyi sakla
   levelAtStart = levelInfo().level;
