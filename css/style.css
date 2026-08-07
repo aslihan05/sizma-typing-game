@@ -1626,7 +1626,13 @@ body {
    Görsel Efektler (VFX)
    ============================================================ */
 
-/* 1. Hacker Tarzı Kaydırma Çubuğu */
+/* 1. Hacker Tarzı Kaydırma Çubuğu
+   Firefox ::-webkit-scrollbar'ı tanımıyor; standart iki özellik orada devreye
+   girer. Kalıtsal oldukları için html'e vermek panellere de yeter. */
+html {
+  scrollbar-color: rgba(var(--rgb-primary), 0.35) var(--color-bg-page);
+  scrollbar-width: thin;
+}
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
@@ -1659,7 +1665,17 @@ body {
   font-style: italic;
   font-size: calc(14px * var(--font-scale));
   text-shadow: 0 0 8px rgba(var(--rgb-warning), 0.6), 0 0 16px rgba(var(--rgb-warning), 0.3);
-  transition: transform 0.1s ease-out;
+}
+/* Seri her arttığında bir "zıplama". Eskiden JS satır içi transform yazıp
+   150 ms sonra setTimeout ile geri alıyordu; seri hızlı artınca zamanlayıcılar
+   üst üste biniyor, oyun arada biterse öğe büyümüş hâlde kalıyordu. CSS
+   animasyonu hem durumu geride bırakmıyor hem prefers-reduced-motion'a takılıyor. */
+.combo-text.combo-pop {
+  animation: comboPop 0.18s ease-out;
+}
+@keyframes comboPop {
+  0%   { transform: scale(1.15); }
+  100% { transform: scale(1); }
 }
 
 /* 4. Boss Alarm (Kırmızı Işık) */

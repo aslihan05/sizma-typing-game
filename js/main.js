@@ -705,8 +705,11 @@ function gameLoop(timestamp) {
       if (comboDisplayEl) {
         comboDisplayEl.textContent = "🔥 " + streak + "x KOMBO!";
         comboDisplayEl.classList.remove("hidden");
-        comboDisplayEl.style.transform = "scale(1.15)";
-        setTimeout(() => { if (comboDisplayEl) comboDisplayEl.style.transform = "scale(1)"; }, 150);
+        // Zıplama animasyonunu yeniden tetikle: sınıfı kaldır, yeniden akış
+        // hesaplat, geri koy. Aksi halde ikinci seride animasyon çalışmaz.
+        comboDisplayEl.classList.remove("combo-pop");
+        void comboDisplayEl.offsetWidth;
+        comboDisplayEl.classList.add("combo-pop");
       }
     } else {
       if (comboDisplayEl) comboDisplayEl.classList.add("hidden");
