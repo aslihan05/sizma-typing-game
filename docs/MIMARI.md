@@ -35,6 +35,7 @@ bağımlılık yönünü de gösterir (üsttekiler alttakileri bilmez).
 | `js/audio.js` | Web Audio ile sentetik sesler | `playKey()`, `playComplete()`, `playGameOver()` … |
 | `js/badges.js` | Yıldız kademeli rozetler (5 kademe, `STAR_COUNT`) | `BADGES_DB`, `loadBadges()`, `evaluateBadges()`, `renderBadgesPanel()` |
 | `js/settings.js` | Tema, yazı boyutu, tam ekran | (kendi kendine bağlanır) |
+| `js/uretici.js` | Nesne + fiil çarpımından komut üretimi (TR/EN, normal/boss) | `URETILEN_TR`, `URETILEN_BOSS_TR`, `URETILEN_EN`, `URETILEN_BOSS_EN` |
 | `js/main.js` | Oyun döngüsü, satır üretimi, giriş modeli, modlar, tüm ekranlar | `startGame()`, `endGame()`, `showMenu()` |
 
 `js/lessons.js`, `js/drills.js`'in yardımcılarını (`drillGroup`,
@@ -271,9 +272,34 @@ kaydeder ve gerekirse bir sonraki dersi açar. Kurallar:
 ## 9. Tarifler
 
 ### Yeni komut eklemek
-`js/main.js` içindeki `COMMANDS_TR` / `COMMANDS_EN` (veya boss için
-`BOSS_COMMANDS_*`) dizisine ekleyin. Torba sistemi gerisini halleder.
-Düzen dili komut bankasını seçer: EN düzendeyken Türkçe karakterli komut gelmez.
+
+İki yol var ve **ikincisi neredeyse her zaman daha verimli.**
+
+**Tek bir komut** için: `js/main.js` içindeki `COMMANDS_TR` / `COMMANDS_EN`
+(boss için `BOSS_COMMANDS_*`) dizisine ekleyin. Kurguya özel, "lezzetli"
+komutlar buraya yazılır. Kazanç: +1 komut.
+
+**Havuzu büyütmek** için: `js/uretici.js` içindeki `U_NESNELER` / `U_FIILLER`
+listelerine kelime ekleyin. Çarpımsal olduğu için **bir nesne ≈ +5, bir fiil
+≈ +9 komut** getirir.
+
+```js
+{ ad: "belleği", tur: "veri" },              // nesne — BELİRTME hâliyle
+{ ad: "sızdır",  turler: ["veri"] },         // fiil — kabul ettiği türler
+```
+
+Üç kural:
+
+1. **Nesneler belirtme hâliyle yazılır** (`"çekirdeği"`, `"logları"`). Ünlü
+   uyumu düzenli ama istisnalı (çekirdek → çekirdeği); kural yazmak yerine
+   çekilmiş hâli saklamak sıfır çekim hatası demek.
+2. **Tür şart.** Olmadan "kamerayı çöz", "algoritmayı aç" gibi eşleşmeler
+   üretilir. Türler: `ağ` · `veri` · `kripto` · `kilit` · `sistem` · `cihaz`.
+3. **EN listelerine Türkçe karakter girmez** — o düzende yazılamaz.
+
+Her iki kaynak `cmdPool()` / `bossPool()` içinde birleştirilir (bir kez,
+`_havuzlar` içinde saklanır) ve torbaya öyle girer. Düzen dili bankayı seçer:
+EN düzendeyken Türkçe karakterli komut gelmez.
 
 ### Yeni rozet eklemek
 `js/badges.js` → `BADGES_DB`'ye bir nesne ekleyin:

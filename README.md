@@ -211,6 +211,7 @@ js/balance.js        zorluk ve denge sabitleri
 js/audio.js          Web Audio ile sentetik terminal sesleri
 js/badges.js         rozet/başarım sistemi
 js/settings.js       tema, yazı boyutu, tam ekran
+js/uretici.js        nesne + fiil çarpımından komut üretimi
 js/main.js           oyun döngüsü, üretim, modlar, ekranlar
 docs/MIMARI.md       mimari ve geliştirici notları
 docs/SIZMA-Dokumantasyon.pdf   türetilmiş belge (bkz. PDF dökümantasyonu)
@@ -253,6 +254,14 @@ Birkaç seçim bilinçli ve oyunun tamamını şekillendiriyor:
   bitmeden hiçbiri tekrar etmez ve torba `localStorage`'da saklandığı için üst üste
   oynanan oyunlarda da tekrar oluşmaz. Günlük görevde torba dondurulur ki herkes
   aynı diziyi görsün.
+- **Komutlar yazılmıyor, üretiliyor.** Sabit liste ne kadar uzasa da torba bitince
+  aynı liste yeniden karışır — döngü kaçınılmazdır, sadece periyodu uzar. Elle komut
+  yazmak *toplamalı* (bir komut yazarsın, +1 olur), kelime listesi *çarpımsal*
+  (bir nesne +5, bir fiil +9 komut). `js/uretici.js` nesne + fiil çarpımından
+  komut kuruyor; elle yazılmış banka yerine değil **yanına** ekleniyor, çünkü
+  oradakiler seçilmiş ve kurguya oturmuş komutlar. Havuz 130 → 1604 (TR).
+  Nesneler belirtme hâliyle yazılı (`"çekirdeği"`): ünlü uyumu düzenli ama
+  istisnalı, kural yazmak yerine çekilmiş hâli saklamak sıfır hata demek.
 
 ### Bilerek yapılmayanlar
 
