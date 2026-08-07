@@ -8,6 +8,15 @@
 // activate sırasında silinir; aksi halde kullanıcı güncellemeyi hiç görmez.
 const SURUM = "sizma-v9";
 
+// Geliştirme ortamı mı? Yerel sunucuda (python -m http.server, Live Server vb.)
+// önbellek-öncelikli davranış işi zorlaştırıyor; aşağıdaki fetch dalı buna bakar.
+// Yayına alınan sürüm gerçek bir alan adından servis edileceği için orada false.
+const GELISTIRME =
+  self.location.hostname === "localhost" ||
+  self.location.hostname === "127.0.0.1" ||
+  self.location.hostname === "[::1]" ||
+  self.location.hostname === "";
+
 // Yalnızca yerel dosyalar. Google Fonts bilerek dışarıda: üçüncü taraf isteği
 // önbelleğe alınırsa çevrimdışıyken sessizce başarısız olabiliyor ve açılışı
 // geciktiriyor. Font gelmezse CSS'teki monospace yedeğine düşülür (--font-main).
@@ -69,6 +78,29 @@ self.addEventListener("fetch", (e) => {
   // sakla. Üçüncü taraf istekleri (fontlar) dokunulmadan geçer.
   const url = new URL(istek.url);
   if (url.origin !== self.location.origin) return;
+
+  // Geliştirmede önce ağ. Önbellek-öncelikli dal, SURUM artırılmadıkça
+  // düzenlenen dosyayı hiç göstermiyor: kod değişiyor, tarayıcı eskisini
+  // sunuyor, "değişiklik neden görünmüyor" avına çıkılıyor. Çevrimdışı
+  // güvencesi burada da duruyor — ağ yoksa önbelleğe düşülür.
+  if (GELISTIRME) {
+    e.respondWith(
+      // no-store şart: yerel sunucu (python http.server) Cache-Control
+      // göndermiyor, tarayıcı da Last-Modified'a bakıp sezgisel önbellekleme
+      // yapıyor. Düz fetch bu yüzden yine eski dosyayı getiriyordu — ağ-öncelikli
+      // dal doğru çalışıyor ama önündeki HTTP önbelleği onu boşa çıkarıyordu.
+      fetch(istek, { cache: "no-store" })
+        .then((yanit) => {
+          if (yanit && yanit.ok) {
+            const kopya = yanit.clone();
+            caches.open(SURUM).then((c) => c.put(istek, kopya));
+          }
+          return yanit;
+        })
+        .catch(() => caches.match(istek, { ignoreSearch: true }))
+    );
+    return;
+  }
 
   e.respondWith(
     caches.match(istek, { ignoreSearch: true }).then((bulunan) => {
