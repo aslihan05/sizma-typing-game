@@ -181,10 +181,17 @@ function cmdPool() {
     ? birlesikHavuz("cmd-en", COMMANDS_EN, typeof URETILEN_EN !== "undefined" ? URETILEN_EN : null)
     : birlesikHavuz("cmd-tr", COMMANDS_TR, typeof URETILEN_TR !== "undefined" ? URETILEN_TR : null);
 }
+// Boss havuzunda uzunluk sınırı var: elle yazılmış bankada 53 karakterlik
+// komutlar vardı, hedef hızda yazması 15.1 sn — boss satırının ekranda kalma
+// süresinden (13.2 sn) uzun, yani yetişilmesi mümkün değildi. Sınır iki
+// kaynağa da uygulanıyor (bkz. BALANCE.bossMaxLen).
 function bossPool() {
-  return isEnLayout()
+  const havuz = isEnLayout()
     ? birlesikHavuz("boss-en", BOSS_COMMANDS_EN, typeof URETILEN_BOSS_EN !== "undefined" ? URETILEN_BOSS_EN : null)
     : birlesikHavuz("boss-tr", BOSS_COMMANDS_TR, typeof URETILEN_BOSS_TR !== "undefined" ? URETILEN_BOSS_TR : null);
+  const ad = isEnLayout() ? "boss-en-kisa" : "boss-tr-kisa";
+  if (!_havuzlar[ad]) _havuzlar[ad] = havuz.filter((k) => k.length <= BALANCE.bossMaxLen);
+  return _havuzlar[ad];
 }
 function noisePool(){ return isEnLayout() ? NOISE_EN : NOISE_TR; }
 

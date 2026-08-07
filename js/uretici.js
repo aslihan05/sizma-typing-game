@@ -180,16 +180,29 @@ function u_uret(nesneler, fiiller, zarflar, zarfOnce) {
   return out;
 }
 
-function u_uretBoss(nesneler, fiiller, sonekler, zarfOnce) {
+// Boss komutunun üst sınırı BALANCE'ta (bossMaxLen) — gerekçesi orada yazılı.
+// balance.js bu dosyadan önce yükleniyor; yine de yoksa makul bir varsayılan.
+const U_BOSS_MAX = (typeof BALANCE !== "undefined" && BALANCE.bossMaxLen) || 40;
+
+// Boss havuzu İKİ kaynaktan gelir: zarflı (orta boy) + sonekli (uzun).
+// Yalnız sonek kullanılınca dağılım 35 karakterde sıkışıyor ve kısa komut
+// hiç kalmıyordu; elle yazılmış bankada medyan 28'di, nefes payı oradan
+// geliyordu. Karışım o payı geri veriyor.
+function u_uretBoss(nesneler, fiiller, sonekler, zarflar, zarfOnce) {
   const out = [];
+  const ekle = (metin) => {
+    if (metin.length <= U_BOSS_MAX && !u_kokTekrariVar(metin)) out.push(metin);
+  };
   for (const n of nesneler) {
     for (const f of fiiller) {
       if (!f.turler.includes(n.tur)) continue;
       const temel = zarfOnce ? (f.ad + " " + n.ad) : (n.ad + " " + f.ad);
-      for (const s of sonekler) {
-        const tam = temel + " " + s;
-        if (!u_kokTekrariVar(tam)) out.push(tam);
+      // Orta boy: nesne + zarf + fiil
+      for (const z of zarflar) {
+        ekle(zarfOnce ? (z + " " + f.ad + " " + n.ad) : (n.ad + " " + z + " " + f.ad));
       }
+      // Uzun: nesne + fiil + sonek
+      for (const s of sonekler) ekle(temel + " " + s);
     }
   }
   return out;
@@ -197,6 +210,6 @@ function u_uretBoss(nesneler, fiiller, sonekler, zarfOnce) {
 
 // Yükleme anında bir kez kurulur; her çekimde yeniden hesaplamanın anlamı yok.
 const URETILEN_TR      = u_uret(U_NESNELER, U_FIILLER, U_ZARFLAR, false);
-const URETILEN_BOSS_TR = u_uretBoss(U_NESNELER, U_FIILLER, U_BOSS_SONEKLERI, false);
+const URETILEN_BOSS_TR = u_uretBoss(U_NESNELER, U_FIILLER, U_BOSS_SONEKLERI, U_ZARFLAR, false);
 const URETILEN_EN      = u_uret(U_NESNELER_EN, U_FIILLER_EN, U_ZARFLAR_EN, true);
-const URETILEN_BOSS_EN = u_uretBoss(U_NESNELER_EN, U_FIILLER_EN, U_BOSS_SONEKLERI_EN, true);
+const URETILEN_BOSS_EN = u_uretBoss(U_NESNELER_EN, U_FIILLER_EN, U_BOSS_SONEKLERI_EN, U_ZARFLAR_EN, true);

@@ -36,6 +36,14 @@ const BALANCE = {
   // (çarpan: 1 + floor(seri/3) × 0.5), yani gösterge çarpan devreye girince çıkar.
   comboShowStreak: 3,
   overdriveStreak: 5,
+
+  // Boss komutunun karakter üst sınırı. Oyun testi: "yetişmesi çok zor".
+  // Sayı doğruladı — orta seviyede boss satırı ekranda 13.2 sn kalıyor
+  // (380 px / (24 × 1.2 hız)), 40 karakteri hedef hızda yazmak 11.4 sn sürüyor.
+  // Bunun üstü, satırı okuyup işareti bulmaya vakit bırakmıyor; 53 karakterlik
+  // bir komut 15.1 sn sürüyor, yani satır ekranda kalmadan bitiyor.
+  // Hem elle yazılmış bankaya hem üretece uygulanır (bkz. bossPool, uretici.js).
+  bossMaxLen: 40,
 };
 
 // Süre ödülü formülü: timeRewardBase + (etkinUzunluk / targetCps)
