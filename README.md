@@ -50,14 +50,14 @@ Parmak modu serbest antrenmandır; Eğitim modu ise bir **öğrenme yoludur** �
 
 | # | Ders | Doğruluk | Hız |
 |---|------|----------|-----|
-| 1 | Dayanak tuşları | %96 | 12 WPM |
-| 2 | Ev sırası | %95 | 14 |
-| 3 | Üst sıra — işaret & orta | %95 | 14 |
-| 4 | Üst sıra tamamı | %95 | 16 |
-| 5 | Alt sıra — işaret & orta | %95 | 16 |
-| 6 | Alt sıra tamamı | %95 | 18 |
-| 7 | Tüm klavye | %95 | 20 |
-| 8 | **Gerçek komutlar** | %95 | 22 |
+| 1 | Dayanak tuşları | %88 | 12 WPM |
+| 2 | Ev sırası | %90 | 14 |
+| 3 | Üst sıra — işaret & orta | %91 | 14 |
+| 4 | Üst sıra tamamı | %92 | 16 |
+| 5 | Alt sıra — işaret & orta | %92 | 16 |
+| 6 | Alt sıra tamamı | %93 | 18 |
+| 7 | Tüm klavye | %94 | 20 |
+| 8 | **Gerçek komutlar** | %94 | 22 |
 | 9 | Türkçe harfler (ğüşöçı) | %95 | 22 |
 | 10 | Rakam & noktalama | %94 | 18 |
 

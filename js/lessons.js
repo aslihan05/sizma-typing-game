@@ -25,48 +25,57 @@ const LESSON_STAR_MULT = [1, 1.2, 1.5];
 // row     : "ev" | "üst" | "alt"  → o satırın harfleri
 // fingers : verilirse yalnızca bu parmakların harfleri (0-3 sol, 4-7 sağ)
 // kind    : "dayanak" | "satır" | "karışık" | "komut" | "türkçe" | "simge"
+//
+// DOĞRULUK EŞİĞİ YÜKSELEN bir eğridir (88 → 95), düz değil. İlk hâlinde 1. ders
+// %96 ile müfredatın EN KATI dersiydi; 10. ders (rakam & noktalama) %94'tü.
+// Yani sıfırdan başlayan biri, kasları hiç oturmamışken en sert kapıyla
+// karşılaşıyordu. Üstelik yanlış harf ilerletmediği için tuş arayan bir
+// başlangıç oyuncusu TEK karakter için birkaç hata biriktiriyor: 137
+// karakterlik 1. derste %96, tüm derste yalnızca ~5 yanlış basış demekti.
+// Ders 1 tam da "tuş aramayı" bitirmek için var; onu ölçmeden cezalandıramaz.
+// "Doğruluk birincil" ilkesi korunuyor — sadece eğri doğru yöne bakıyor.
 const LESSONS = [
   {
     no: 1, kind: "dayanak", title: "Dayanak Tuşları",
     desc: "Sekiz parmağın evdeki yeri. Eller buradan kalkmaz, buraya döner.",
-    acc: 96, wpm: 12,
+    acc: 88, wpm: 12,
   },
   {
     no: 2, kind: "satır", row: "ev", title: "Ev Sırası",
     desc: "Ev sırasının tamamı — işaret parmaklarının yana uzandığı tuşlar dahil.",
-    acc: 95, wpm: 14,
+    acc: 90, wpm: 14,
   },
   {
     no: 3, kind: "satır", row: "üst", fingers: [2, 3, 4, 5],
     title: "Üst Sıra — İşaret & Orta",
     desc: "Üst sıraya ilk çıkış: en güçlü dört parmakla.",
-    acc: 95, wpm: 14,
+    acc: 91, wpm: 14,
   },
   {
     no: 4, kind: "satır", row: "üst", title: "Üst Sıra",
     desc: "Üst sıranın tamamı — yüzük ve serçe parmaklar da devrede.",
-    acc: 95, wpm: 16,
+    acc: 92, wpm: 16,
   },
   {
     no: 5, kind: "satır", row: "alt", fingers: [2, 3, 4, 5],
     title: "Alt Sıra — İşaret & Orta",
     desc: "Alt sıraya iniş. Bilek sabit kalsın, parmaklar insin.",
-    acc: 95, wpm: 16,
+    acc: 92, wpm: 16,
   },
   {
     no: 6, kind: "satır", row: "alt", title: "Alt Sıra",
     desc: "Alt sıranın tamamı. Serçe parmak en zorlanan yerdir, acele etme.",
-    acc: 95, wpm: 18,
+    acc: 93, wpm: 18,
   },
   {
     no: 7, kind: "karışık", title: "Tüm Klavye",
     desc: "Üç sıra karışık. Artık klavyeye bakmadan yazabiliyor olmalısın.",
-    acc: 95, wpm: 20,
+    acc: 94, wpm: 20,
   },
   {
     no: 8, kind: "komut", title: "Gerçek Komutlar",
     desc: "Diziler bitti. Bundan sonrası oyunun kendi komutları — asıl iş bu.",
-    acc: 95, wpm: 22,
+    acc: 94, wpm: 22,
   },
   {
     no: 9, kind: "türkçe", title: "Türkçe Harfler",
