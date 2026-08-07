@@ -13,7 +13,9 @@ Zaman senin canın. Doğru komut süre kazandırır, kaçan komut ve tuzaklar s�
 - **Ayıklama** — her satırda komut yok; saf gürültü satırları cezasızdır, asıl beceri işareti fark etmek.
 - **Harf harf doğrulama** — doğru harfler yeşil yanar, yazdığın satıra kilitlenirsin.
 - **Yanlış harfin cezası yoktur** — sadece ilerlemez. Amaç panik değil, doğru refleks.
-- **Seri (combo)** — art arda komut tamamladıkça puan çarpanı büyür.
+- **Seri (combo)** — art arda komut tamamladıkça puan çarpanı büyür. 10'da seri
+  göstergesi belirir, 20'de terminal **Overdrive**'a geçip renk değiştirir.
+  Bunlar skorun ödülü olduğu için Pratik / Parmak / Eğitim modlarında çıkmaz.
 
 ### Düşmanlar
 
@@ -88,6 +90,11 @@ tablosu, rozetler, ders ilerlemesi) tek bir `sizma-data.json` dosyasına indirir
 > ilerlemen "kaybolmuş" gibi görünür. Oyunu hep aynı adresten aç; VS Code Live
 > Server kullanıyorsan portu sabitle.
 
+Tarayıcı kaydetmeye hiç izin vermiyorsa (site verileri engellenmişse ya da sayfa
+`file://` altında açıldıysa) oyun yine tam çalışır — bellek içi bir depolamaya
+düşer ve menüde bunu söyleyen bir uyarı gösterir. Tek fark, ilerlemenin sekme
+kapanınca uçmasıdır.
+
 ## Oyna
 
 **→ [aslihan05.github.io/sizma-typing-game](https://aslihan05.github.io/sizma-typing-game/)**
@@ -136,9 +143,12 @@ python -m http.server 8000
 
 Sonra tarayıcıda `http://localhost:8000` adresine git.
 
-> Service worker geliştirmeyi zorlaştırabilir: değişikliklerin görünmesi için
-> `sw.js` içindeki `SURUM` sabitini artır, ya da tarayıcının geliştirici
-> araçlarında "Update on reload" seçeneğini aç.
+Service worker `localhost` / `127.0.0.1` üzerinde **önce ağı** dener, yani
+düzenlediğin dosya yenilemede olduğu gibi gelir — `SURUM` artırmana gerek yok.
+Ağ yoksa yine önbelleğe düşer, dolayısıyla çevrimdışı davranışı geliştirirken
+de sınayabilirsin (sunucuyu durdurup sayfayı yenile). Gerçek alan adından
+servis edilen sürüm eskisi gibi önbellek-önceliklidir; **yayına çıkarken
+`sw.js` içindeki `SURUM` sabitini artır**, yoksa kullanıcı güncellemeyi görmez.
 
 ## Erişilebilirlik
 
@@ -162,6 +172,7 @@ manifest.json        PWA künyesi (ad, ikonlar, renkler)
 sw.js                service worker — çevrimdışı önbellek
 icons/               uygulama ikonları
 css/style.css        görsel tema, CRT efekti, tema değişkenleri
+js/storage.js        depolama güvenlik ağı — en başta yüklenir
 js/keyboard.js       ekran klavyesi, düzenler, parmak renkleri, ısı haritası
 js/stats.js          analiz, seviye/XP, grafik, lider tablosu, dışa/içe aktarma
 js/drills.js         parmak antrenmanı dizileri
@@ -209,7 +220,15 @@ Birkaç seçim bilinçli ve oyunun tamamını şekillendiriyor:
 
 - **Power-up'lar** — oyuncuyu klavyeden koparıp "ne zaman kullansam" kararına iter.
 - **Çok oyunculu mod** — backend, eşleştirme ve hile önleme gerektirir; ayrı bir proje.
-- **Mobil dokunmatik oynanış** — 10 parmak öğreten bir oyunu dokunmatikte oynatmak amacı boşa çıkarır.
+
+### Kararı değişenler
+
+- **Dokunmatik oynanış.** Uzun süre "yapılmayacak" listesindeydi: 10 parmak
+  öğreten bir oyunu dokunmatikte oynatmak amacı boşa çıkarır. Karşı gerekçe
+  ağır bastı — telefonuyla açan biri karşısında ölü bir ekran buluyordu.
+  Şimdi ekran klavyesi bir **giriş aygıtına** dönüşebiliyor, ama asıl gerekçe
+  hâlâ geçerli sayılıyor: mod bir uyarının arkasında duruyor, varsayılan değil
+  ve öğrenme yolu olarak sunulmuyor (bkz. [Oyna](#oyna)).
 
 ## Lisans
 

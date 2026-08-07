@@ -26,6 +26,7 @@ bağımlılık yönünü de gösterir (üsttekiler alttakileri bilmez).
 
 | Dosya | Sorumluluk | Dışarıya verdiği başlıcalar |
 |---|---|---|
+| `js/storage.js` | Depolama güvenlik ağı: `localStorage` kullanılamıyorsa bellek içi taklidini kurar | `SIZMA_DEPOLAMA_KALICI` |
 | `js/keyboard.js` | Ekran klavyesi, düzen tabloları, parmak haritaları, ısı haritası çizimi | `KBD_LAYOUTS`, `KBD_FINGER_MAPS`, `renderKeyboard()`, `highlightNextKey()` |
 | `js/stats.js` | Session + lifetime analiz, WPM/doğruluk, seviye/XP, trend grafiği, lider tablosu, dışa/içe aktarma | `sStats`, `trackEvent()`, `wpmOf()`, `accuracyOf()`, `levelInfo()`, `exportData()`, `importData()` |
 | `js/drills.js` | Parmak antrenmanı dizisi üretimi | `DRILL_TARGETS`, `makeUniqueDrill()`, `drillRowLetters()`, `drillGroup()` |
@@ -39,6 +40,13 @@ bağımlılık yönünü de gösterir (üsttekiler alttakileri bilmez).
 `js/lessons.js`, `js/drills.js`'in yardımcılarını (`drillGroup`,
 `drillRowLetters`, `isDrillLetter`) yeniden kullanır — **drills.js'ten sonra
 yüklenmelidir.**
+
+`js/storage.js` **en başta** yüklenmelidir. Sonraki dosyaların bir kısmı üst
+seviyede `localStorage` okur (`settings.js`'te tema/yazı boyutu, `main.js`'te
+mod/öğretici/klavye düzeni). Depolama engelliyse bu okumalar istisna fırlatır
+ve betiği orada keser: menü açılır ama ekran klavyesi çizilmez ve `startGame`
+`SecurityError` atar — yani oyun başlatılamaz. Ağ en başta kurulunca sonraki
+dosyalar ham `localStorage`'a hiç dokunmamış olur.
 
 ## 3. Oyun döngüsü ve durum
 
@@ -304,12 +312,45 @@ Test ederken `localStorage`'ı kirletmemek için önce
 **💾 dışa aktar** ile yedek alın; sonra `resetStats()` / `resetLessons()`
 serbestçe kullanılabilir.
 
+### Service worker ve geliştirme
+
+`sw.js` `localhost` / `127.0.0.1` / `[::1]` üzerinde **ağ-öncelikli** çalışır,
+yani düzenlenen dosya yenilemede olduğu gibi gelir. Bunun için `fetch`'e
+`cache: "no-store"` gerekiyor: yerel sunucu `Cache-Control` göndermediği için
+tarayıcı `Last-Modified`'a bakıp sezgisel önbellekleme yapıyor ve düz `fetch`
+yine eski dosyayı getiriyordu.
+
+Çevrimdışı davranışı sınamak için sunucuyu durdurup sayfayı yenileyin — ağ
+başarısız olunca önbelleğe düşülür. Yayına çıkarken `SURUM` sabitini artırın;
+gerçek alan adında dal önbellek-öncelikli olduğu için artırılmazsa kullanıcı
+güncellemeyi hiç görmez.
+
+### Depolamasız ortamı sınamak
+
+`index.html`'in bir kopyasını alıp `<head>` sonuna şunu ekleyin:
+
+```html
+<script>
+Object.defineProperty(window, "localStorage", {
+  configurable: true,
+  get() { throw new DOMException("blocked", "SecurityError"); }
+});
+</script>
+```
+
+Beklenen: oyun tam çalışır, `SIZMA_DEPOLAMA_KALICI === false` olur ve menüde
+uyarı görünür. `js/storage.js` betiğini kaldırırsanız klavye çizilmez ve
+`startGame()` `SecurityError` atar — ağın ne işe yaradığını bu fark gösterir.
+
 ## 11. Bilerek yapılmayanlar
 
 - **Power-up'lar** — oyuncuyu klavyeden koparıp "ne zaman kullansam" kararına iter.
   Zaten süre = kaynak ve beş düşman tipi var; karmaşıklık bütçesi modlara harcanıyor.
 - **Çok oyunculu mod** — backend + eşleştirme + hile önleme; ayrı bir proje.
-- **Mobil dokunmatik oynanış** — 10 parmak öğreten oyunu dokunmatikte oynatmak
-  amacı boşa çıkarır. En fazla uyarı + istatistik görüntüleme düşünülebilir.
+- ~~**Mobil dokunmatik oynanış**~~ — **karar değişti.** Gerekçe ("10 parmak
+  öğreten oyunu dokunmatikte oynatmak amacı boşa çıkarır") hâlâ geçerli
+  sayılıyor, ama telefonuyla açan biri ölü bir ekran buluyordu. Ekran klavyesi
+  artık giriş aygıtı olabiliyor; mod bir uyarının arkasında, varsayılan değil
+  ve öğrenme yolu olarak sunulmuyor.
 - **Ayrı bir modülerleştirme fazı** — çalışan 1000+ satırı yeniden yazmak risk;
   bölünme yeni dosyalar üzerinden doğal olarak gerçekleşir.
