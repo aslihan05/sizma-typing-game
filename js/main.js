@@ -3,6 +3,9 @@
 // --- DOM tutamaçları: HTML'deki id'leri JavaScript'e bağla ---
 const playfield = document.getElementById("playfield");
 const clockEl   = document.getElementById("clock");
+const scoreClockContainer = document.getElementById("scoreClockContainer");
+const termInputEl = document.getElementById("termInput");
+const comboDisplayEl = document.getElementById("comboDisplay");
 const scoreEl   = document.getElementById("score");
 const statusEl  = document.getElementById("status");
 
@@ -523,6 +526,7 @@ let sentences  = [];     // ekranda inen TÜM cümleler (dizi)
 let target     = null;   // o an yazdığın (kilitli) cümle
 let running    = false;  // oyun oynanıyor mu (menüdeyken false)
 let streak     = 0;      // arka arkaya başarı serisi (combo çarpanı için)
+let lastStreak = 0;      // son okunan seri (VFX güncellemeleri için)
 let score      = 0;      // toplam skor
 let timeLeft   = BALANCE.startTime;
 let elapsed    = 0;      // oyun başından beri geçen süre (düşman rampası için)
@@ -617,6 +621,8 @@ function spawnSentenceAt(y, forceNormal) {
 // === Boss sistemi ===
 function startBoss() {
   bossActive = true;
+  document.body.classList.add("boss-alarm");
+  if (typeof updateMatrixColors === "function") updateMatrixColors();
   bossHp = BALANCE.bossHp;
   bossMaxHp = BALANCE.bossHp;
   if (bossBarEl) bossBarEl.classList.remove("hidden");
@@ -640,6 +646,8 @@ function damageBoss() {
 
 function endBoss() {
   bossActive = false;
+  document.body.classList.remove("boss-alarm");
+  if (typeof updateMatrixColors === "function") updateMatrixColors();
   lastBossElapsed = elapsed;
   if (bossBarEl) bossBarEl.classList.add("hidden");
   terminalEl.classList.remove("boss-mode");
@@ -684,6 +692,34 @@ function gameLoop(timestamp) {
 
   if (!waitingStart) {
     elapsed += dt;                              // oyun süresi ilerler (rampa için)
+  }
+
+  // --- Görsel Efektler (VFX) Güncellemesi ---
+  // Kombo ve Overdrive skorun ödülü; pratik / parmak / eğitim modlarında skor
+  // bilerek geri planda (sonuç ekranında bile gösterilmiyor). Ders ortasında
+  // "🔥 15x KOMBO!" yeni başlayanı hedeften koparıyordu.
+  const vfxAcik = !isZamansiz();
+  if (streak !== lastStreak) {
+    if (typeof updateMatrixSpeed === "function") updateMatrixSpeed(vfxAcik ? streak : 0);
+    if (streak >= 10 && vfxAcik) {
+      if (comboDisplayEl) {
+        comboDisplayEl.textContent = "🔥 " + streak + "x KOMBO!";
+        comboDisplayEl.classList.remove("hidden");
+        comboDisplayEl.style.transform = "scale(1.15)";
+        setTimeout(() => { if (comboDisplayEl) comboDisplayEl.style.transform = "scale(1)"; }, 150);
+      }
+    } else {
+      if (comboDisplayEl) comboDisplayEl.classList.add("hidden");
+    }
+    lastStreak = streak;
+  }
+
+  // Overdrive ve Boss Alarm: seriden bağımsız, her karede duruma göre güncelle
+  const wantOverdrive = streak >= 20 && !bossActive && vfxAcik;
+  const hasOverdrive = document.body.classList.contains("theme-overdrive");
+  if (wantOverdrive !== hasOverdrive) {
+    document.body.classList.toggle("theme-overdrive", wantOverdrive);
+    if (typeof updateMatrixColors === "function") updateMatrixColors();
   }
 
   // Boss zamanlayıcısı
@@ -1138,6 +1174,9 @@ function resetGame() {
   target = null;   // eleman zaten silindi, sınıf temizlemeye gerek yok
   score = 0;
   streak = 0;
+  lastStreak = 0;
+  if (comboDisplayEl) comboDisplayEl.classList.add("hidden");
+  if (typeof updateMatrixSpeed === "function") updateMatrixSpeed(0);
   timeLeft = difficulty.startTime || BALANCE.startTime;
   elapsed = 0;
   lastTime = 0;
@@ -1145,6 +1184,8 @@ function resetGame() {
   if (pauseOverlay) pauseOverlay.classList.add("hidden");
   // Boss sıfırla
   bossActive = false;
+  document.body.classList.remove("boss-alarm");
+  document.body.classList.remove("theme-overdrive");
   bossHp = 0;
   lastBossElapsed = 0;
   if (bossBarEl) bossBarEl.classList.add("hidden");
@@ -1224,10 +1265,15 @@ function softArayuzuTazele() {
 }
 
 if (kbdSectionEl) {
-  kbdSectionEl.addEventListener("click", (e) => {
+  kbdSectionEl.addEventListener("pointerdown", (e) => {
     if (!softAktif() || !running || paused) return;
+    // Yalnızca birincil basış yazsın: sağ/orta tık ve ikinci parmağın
+    // dokunuşu da pointerdown üretiyor, hepsi harf gönderiyordu.
+    if (e.button !== 0) return;
+    if (!e.isPrimary) return;
     const keyEl = e.target.closest(".key");
     if (!keyEl || !keyEl.dataset.key) return;
+    e.preventDefault(); // Odak kaybolmasını ve sonraki click'i engelle
     handleTypedKey(keyEl.dataset.key);
   });
 }
@@ -1305,6 +1351,8 @@ function startGame(diffKey) {
   menuEl.classList.add("hidden");
   gameoverEl.classList.add("hidden");
   statsPanelEl.classList.add("hidden");
+  if (scoreClockContainer) scoreClockContainer.classList.remove("hidden");
+  if (termInputEl) termInputEl.classList.remove("hidden");
   // Seviye atlamayı yakalayabilmek için oyun ÖNCESİ seviyeyi sakla
   levelAtStart = levelInfo().level;
   running = true;
@@ -1326,8 +1374,20 @@ function endGame() {
   unfreezeBags();
   running = false;
   paused = false;
+  // Boss aktifken süre biterse (ya da "bitir"e basılırsa) boss durumu ekranda
+  // kalıyordu: can barı ve boss-mode terminali sonuç ekranıyla menüye taşınıyor,
+  // ancak bir sonraki resetGame'de temizleniyordu. Burada tamamını kapatıyoruz.
+  bossActive = false;
+  document.body.classList.remove("boss-alarm");
+  document.body.classList.remove("theme-overdrive");
+  if (bossBarEl) bossBarEl.classList.add("hidden");
+  terminalEl.classList.remove("boss-mode");
+  if (typeof updateMatrixColors === "function") updateMatrixColors();
+  if (typeof updateMatrixSpeed === "function") updateMatrixSpeed(0);
   if (pauseBtn) pauseBtn.classList.add("hidden");
   if (finishBtn) finishBtn.classList.add("hidden");
+  if (scoreClockContainer) scoreClockContainer.classList.add("hidden");
+  if (termInputEl) termInputEl.classList.add("hidden");
   if (pauseOverlay) pauseOverlay.classList.add("hidden");
   // Oyun bitti: ekran klavyesi kapansın, sonuç ekranı görünür olsun
   softArayuzuTazele();     // oyun bitti → sil/iptal tuşları gizlensin
@@ -1392,6 +1452,8 @@ function showMenu() {
   menuEl.classList.remove("hidden");
   if (pauseBtn) pauseBtn.classList.add("hidden");
   if (finishBtn) finishBtn.classList.add("hidden");
+  if (scoreClockContainer) scoreClockContainer.classList.add("hidden");
+  if (termInputEl) termInputEl.classList.add("hidden");
   applyModeUI();
 }
 
@@ -1870,8 +1932,18 @@ if (!localStorage.getItem(TUTORIAL_KEY)) {
   
   let fadeColor = "rgba(10, 14, 10, 0.05)";
   let textColor = "rgba(126, 231, 135, 0.25)";
+  let matrixSpeed = 1;
+
+  window.updateMatrixSpeed = function(streak) {
+    matrixSpeed = 1 + Math.min(streak * 0.1, 4);
+  };
 
   window.updateMatrixColors = function() {
+    if (bossActive) {
+      textColor = "rgba(255, 50, 50, 0.4)";
+      fadeColor = "rgba(20, 0, 0, 0.08)";
+      return;
+    }
     const style = getComputedStyle(document.body);
     const rgbPrimary = style.getPropertyValue('--rgb-primary').trim() || "126, 231, 135";
     textColor = `rgba(${rgbPrimary}, 0.25)`;
@@ -1897,12 +1969,12 @@ if (!localStorage.getItem(TUTORIAL_KEY)) {
     for (let i = 0; i < columns.length; i++) {
       const ch = chars[Math.floor(Math.random() * chars.length)];
       const x  = i * fontSize;
-      const y  = columns[i] * fontSize;
+      const y  = Math.floor(columns[i]) * fontSize;
       if (y > 0) ctx.fillText(ch, x, y);
       if (y > matrixCanvas.height && Math.random() > 0.975) {
         columns[i] = Math.floor(Math.random() * -15);
       }
-      columns[i]++;
+      columns[i] += matrixSpeed;
     }
     requestAnimationFrame(draw);
   }

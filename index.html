@@ -31,11 +31,15 @@
 
     <header class="term-header">
       <span class="term-title">root@hedef:~#</span>
-      <span style="display:flex;align-items:center;gap:8px;">
+      <span class="term-header-controls">
         <button class="pause-btn" id="muteBtn" title="Sesi kapat">🔊</button>
         <button class="pause-btn hidden" id="finishBtn" title="Bitir ve raporu gör">■ bitir</button>
         <button class="pause-btn hidden" id="pauseBtn" title="Duraklat (Esc)">⏸</button>
-        <span class="term-clock" id="clock">00:00</span>
+        <span class="term-clock hidden" id="scoreClockContainer">
+          <span id="comboDisplay" class="combo-text hidden"></span>
+          <span id="score" class="score-text">skor: 0</span>
+          <span id="clock">00:00</span>
+        </span>
       </span>
     </header>
 
@@ -216,13 +220,12 @@
     </div>
 
     <!-- Yazma göstergesi -->
-    <div class="term-input" id="termInput">
-      <span class="input-prompt">&gt;_</span>
+    <div class="term-input hidden" id="termInput">
+      <span class="input-prompt">&gt;<span class="blink">_</span></span>
       <span class="input-text" id="inputText"></span>
     </div>
 
     <footer class="term-status">
-      <span id="score">skor: 0</span>
       <span id="status">hazır</span>
     </footer>
 
@@ -251,15 +254,15 @@
 </main>
 
 <!-- Betikler: klavye → analiz → alıştırma → denge → ses → oyun -->
-<script src="js/keyboard.js"></script>
-<script src="js/stats.js"></script>
-<script src="js/drills.js"></script>
-<script src="js/lessons.js"></script>
-<script src="js/balance.js"></script>
-<script src="js/audio.js"></script>
-<script src="js/badges.js"></script>
-<script src="js/settings.js"></script>
-<script src="js/main.js"></script>
+  <script src="js/keyboard.js"></script>
+  <script src="js/stats.js"></script>
+  <script src="js/drills.js"></script>
+  <script src="js/lessons.js"></script>
+  <script src="js/balance.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/badges.js"></script>
+  <script src="js/settings.js"></script>
+  <script src="js/main.js"></script>
 
 <!-- Service worker: çevrimdışı oynanabilirlik ve "uygulama olarak yükle".
      file:// ile açıldığında kayıt başarısız olur; oyun yine normal çalışır. -->

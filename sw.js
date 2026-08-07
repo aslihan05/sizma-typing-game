@@ -6,7 +6,7 @@
 //
 // SÜRÜM: Dosyalardan biri değiştiğinde bu numarayı artırın. Eski önbellek
 // activate sırasında silinir; aksi halde kullanıcı güncellemeyi hiç görmez.
-const SURUM = "sizma-v7";
+const SURUM = "sizma-v9";
 
 // Yalnızca yerel dosyalar. Google Fonts bilerek dışarıda: üçüncü taraf isteği
 // önbelleğe alınırsa çevrimdışıyken sessizce başarısız olabiliyor ve açılışı
@@ -60,7 +60,7 @@ self.addEventListener("fetch", (e) => {
   // oyun yine açılır.
   if (istek.mode === "navigate") {
     e.respondWith(
-      fetch(istek).catch(() => caches.match("./index.html"))
+      fetch(istek).catch(() => caches.match("./index.html", { ignoreSearch: true }))
     );
     return;
   }
@@ -71,7 +71,7 @@ self.addEventListener("fetch", (e) => {
   if (url.origin !== self.location.origin) return;
 
   e.respondWith(
-    caches.match(istek).then((bulunan) => {
+    caches.match(istek, { ignoreSearch: true }).then((bulunan) => {
       if (bulunan) return bulunan;
       return fetch(istek).then((yanit) => {
         if (yanit && yanit.ok) {
