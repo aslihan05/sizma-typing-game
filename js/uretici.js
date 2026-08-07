@@ -48,6 +48,24 @@ const U_NESNELER = [
   { ad: "diski",             tur: "cihaz" },
   { ad: "uyduyu",            tur: "cihaz" },
   { ad: "sensörü",           tur: "cihaz" },
+  // Zarf katmanı kaldırılınca havuz küçüldü; telafi buradan geliyor.
+  // Kelime eklemek KISA komut üretir, zarf eklemek uzun — doğru büyüme yolu bu.
+  { ad: "yönlendiriciyi",    tur: "ağ" },
+  { ad: "trafiği",           tur: "ağ" },
+  { ad: "vekil sunucuyu",    tur: "ağ" },
+  { ad: "arşivi",            tur: "veri" },
+  { ad: "raporu",            tur: "veri" },
+  { ad: "listeyi",           tur: "veri" },
+  { ad: "kaydı",             tur: "veri" },
+  { ad: "parolayı",          tur: "kripto" },
+  { ad: "imzayı",            tur: "kripto" },
+  { ad: "görevi",            tur: "sistem" },
+  { ad: "modülü",            tur: "sistem" },
+  { ad: "arayüzü",           tur: "sistem" },
+  { ad: "paneli",            tur: "sistem" },
+  { ad: "mikrofonu",         tur: "cihaz" },
+  { ad: "yazıcıyı",          tur: "cihaz" },
+  { ad: "dronu",             tur: "cihaz" },
 ];
 
 const U_FIILLER = [
@@ -66,6 +84,13 @@ const U_FIILLER = [
   { ad: "yönlendir",        turler: ["ağ"] },
   { ad: "sızdır",           turler: ["veri"] },
   { ad: "tara",             turler: ["ağ", "sistem"] },
+  { ad: "kilitle",          turler: ["veri", "sistem", "cihaz"] },
+  { ad: "kapat",            turler: ["ağ", "sistem"] },
+  { ad: "izle",             turler: ["ağ", "cihaz"] },
+  { ad: "değiştir",         turler: ["veri", "kripto", "sistem"] },
+  { ad: "yedekle",          turler: ["veri"] },
+  { ad: "doğrula",          turler: ["kripto"] },
+  { ad: "çalıştır",         turler: ["sistem"] },
 ];
 
 // Türkçede tarz zarfı FİİLDEN ÖNCE gelir: "bağlantıyı sessizce şifrele".
@@ -112,6 +137,20 @@ const U_NESNELER_EN = [
   { ad: "the disk",        tur: "device" },
   { ad: "the satellite",   tur: "device" },
   { ad: "the sensor",      tur: "device" },
+  { ad: "the router",      tur: "net" },
+  { ad: "the traffic",     tur: "net" },
+  { ad: "the proxy",       tur: "net" },
+  { ad: "the archive",     tur: "data" },
+  { ad: "the report",      tur: "data" },
+  { ad: "the list",        tur: "data" },
+  { ad: "the password",    tur: "crypto" },
+  { ad: "the signature",   tur: "crypto" },
+  { ad: "the task",        tur: "system" },
+  { ad: "the module",      tur: "system" },
+  { ad: "the panel",       tur: "system" },
+  { ad: "the microphone",  tur: "device" },
+  { ad: "the printer",     tur: "device" },
+  { ad: "the drone",       tur: "device" },
 ];
 
 const U_FIILLER_EN = [
@@ -130,6 +169,13 @@ const U_FIILLER_EN = [
   { ad: "reroute", turler: ["net"] },
   { ad: "leak",    turler: ["data"] },
   { ad: "scan",    turler: ["net", "system"] },
+  { ad: "lock",    turler: ["data", "system", "device"] },
+  { ad: "close",   turler: ["net", "system"] },
+  { ad: "watch",   turler: ["net", "device"] },
+  { ad: "alter",   turler: ["data", "crypto", "system"] },
+  { ad: "back up", turler: ["data"] },
+  { ad: "verify",  turler: ["crypto"] },
+  { ad: "run",     turler: ["system"] },
 ];
 
 // İngilizcede zarf fiilden önce doğal duruyor: "silently wipe the logs".
@@ -161,28 +207,32 @@ function u_kokTekrariVar(metin) {
   return false;
 }
 
-// nesne + (zarf) + fiil — Türkçe dizilişi. İngilizce için zarf başa alınır.
-function u_uret(nesneler, fiiller, zarflar, zarfOnce) {
+// Normal komutlar: SADECE nesne + fiil. Zarf katmanı bilerek yok.
+//
+// İlk sürümde zarflı varyantlar da buraya giriyordu ve havuzun %78'ini
+// kaplıyordu — torba düzgün dağıttığı için çekilen her dört komuttan üçü
+// uzun olan çıkıyordu. Sonuç: medyan 15'ten 24'e fırladı, komutlar "ard arda
+// uzun" geldi ve yetişilemez oldu. Zarf artık yalnızca boss'ta, çünkü orada
+// uzun komut zaten kasıtlı (ve bossMaxLen ile sınırlı).
+//
+// Havuzu büyütmenin doğru yolu zarf değil, nesne/fiil listesini uzatmak:
+// eklenen her kelime KISA komut üretir.
+function u_uret(nesneler, fiiller, zarfOnce) {
   const out = [];
   for (const n of nesneler) {
     for (const f of fiiller) {
       if (!f.turler.includes(n.tur)) continue;
       const temel = zarfOnce ? (f.ad + " " + n.ad) : (n.ad + " " + f.ad);
-      if (!u_kokTekrariVar(temel)) out.push(temel);
-      for (const z of zarflar) {
-        const uzun = zarfOnce
-          ? (z + " " + f.ad + " " + n.ad)
-          : (n.ad + " " + z + " " + f.ad);
-        if (!u_kokTekrariVar(uzun)) out.push(uzun);
-      }
+      if (temel.length <= U_CMD_MAX && !u_kokTekrariVar(temel)) out.push(temel);
     }
   }
   return out;
 }
 
-// Boss komutunun üst sınırı BALANCE'ta (bossMaxLen) — gerekçesi orada yazılı.
-// balance.js bu dosyadan önce yükleniyor; yine de yoksa makul bir varsayılan.
+// Uzunluk üst sınırları BALANCE'ta — gerekçeleri orada yazılı.
+// balance.js bu dosyadan önce yükleniyor; yine de yoksa makul varsayılanlar.
 const U_BOSS_MAX = (typeof BALANCE !== "undefined" && BALANCE.bossMaxLen) || 40;
+const U_CMD_MAX  = (typeof BALANCE !== "undefined" && BALANCE.cmdMaxLen)  || 30;
 
 // Boss havuzu İKİ kaynaktan gelir: zarflı (orta boy) + sonekli (uzun).
 // Yalnız sonek kullanılınca dağılım 35 karakterde sıkışıyor ve kısa komut
@@ -209,7 +259,7 @@ function u_uretBoss(nesneler, fiiller, sonekler, zarflar, zarfOnce) {
 }
 
 // Yükleme anında bir kez kurulur; her çekimde yeniden hesaplamanın anlamı yok.
-const URETILEN_TR      = u_uret(U_NESNELER, U_FIILLER, U_ZARFLAR, false);
+const URETILEN_TR      = u_uret(U_NESNELER, U_FIILLER, false);
 const URETILEN_BOSS_TR = u_uretBoss(U_NESNELER, U_FIILLER, U_BOSS_SONEKLERI, U_ZARFLAR, false);
-const URETILEN_EN      = u_uret(U_NESNELER_EN, U_FIILLER_EN, U_ZARFLAR_EN, true);
+const URETILEN_EN      = u_uret(U_NESNELER_EN, U_FIILLER_EN, true);
 const URETILEN_BOSS_EN = u_uretBoss(U_NESNELER_EN, U_FIILLER_EN, U_BOSS_SONEKLERI_EN, U_ZARFLAR_EN, true);

@@ -238,7 +238,7 @@ seçildi — tavan, belli bir uzunluktan sonra uzunluk farkını anlamsız kıla
 `DIFFICULTIES.lineHeight`, CSS'teki `.sentence` yüksekliğinden (18 px) küçük
 olamaz; yoksa satırlar üst üste biner.
 
-### Komut uzunluğunun üst sınırı — `BALANCE.bossMaxLen`
+### Komut uzunluğunun üst sınırı — `cmdMaxLen` / `bossMaxLen`
 
 Bir komut, satırın ekranda kaldığı süreden uzun sürede yazılıyorsa **hedef
 hızda yazan biri için bile yetişilmesi imkânsızdır.** Sınır buradan çıkar:
@@ -253,7 +253,15 @@ Orta seviyede: 380 / (24 × 1.2) = **13.2 sn** satır ömrü. 40 karakteri hedef
 hızda (3.5 kps) yazmak 11.4 sn, yani okuma payı 1.8 sn. `bossMaxLen` bu yüzden
 40; 57 karakterlik bir komut 16.3 sn sürer ve satır ekranda kalmadan biter.
 
-Sınır **hem üretece hem elle yazılmış bankaya** uygulanır (bkz. `bossPool()`).
+İki sınır var: normal komutlar `cmdMaxLen` (30), boss `bossMaxLen` (40).
+İkisi de **hem üretece hem elle yazılmış bankaya** uygulanır
+(bkz. `cmdPool()` / `bossPool()`).
+
+**Zarf katmanı yalnızca boss'ta.** Normal komutlara da uygulanınca havuzun
+%78'i zarflı oluyordu — torba düzgün dağıttığı için çekilen her dört komuttan
+üçü uzun olan çıkıyor, medyan 15'ten 24'e fırlıyordu. Havuzu büyütmenin doğru
+yolu zarf değil, `U_NESNELER` / `U_FIILLER` listesini uzatmaktır: eklenen her
+kelime **kısa** komut üretir.
 
 > Ortalamaya değil **medyana** bakın. Üreteç ilk sürümde boss için yalnız sonek
 > kullanıyordu: ortalama 33'ten 35.6'ya çıkmış görünüyordu (zararsız), ama

@@ -44,6 +44,13 @@ const BALANCE = {
   // bir komut 15.1 sn sürüyor, yani satır ekranda kalmadan bitiyor.
   // Hem elle yazılmış bankaya hem üretece uygulanır (bkz. bossPool, uretici.js).
   bossMaxLen: 40,
+
+  // Normal komutun karakter üst sınırı. Aynı kural: bir komut, satırın ekranda
+  // kaldığı süreden uzun sürede yazılıyorsa yetişilmesi imkânsızdır.
+  // Zor seviyede satır ömrü 380/34 = 11.2 sn, hedef hız 5.0 kps → 30 karakter
+  // 6 sn sürer, okuma payı 5.2 sn kalır. Elle yazılmış bankanın en uzunu da
+  // 29'du; bu sınır o dağılımı koruyor.
+  cmdMaxLen: 30,
 };
 
 // Süre ödülü formülü: timeRewardBase + (etkinUzunluk / targetCps)

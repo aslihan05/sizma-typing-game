@@ -176,10 +176,16 @@ function birlesikHavuz(ad, elle, uretilen) {
   return _havuzlar[ad];
 }
 
+// Normal havuzda da uzunluk sınırı var (bkz. BALANCE.cmdMaxLen): boss'a sınır
+// konulurken normal komutlar atlanmıştı ve üreteç oraya 48 karakterlik komutlar
+// koyuyordu — elle yazılmış bankanın en uzunu 29'du.
 function cmdPool() {
-  return isEnLayout()
+  const havuz = isEnLayout()
     ? birlesikHavuz("cmd-en", COMMANDS_EN, typeof URETILEN_EN !== "undefined" ? URETILEN_EN : null)
     : birlesikHavuz("cmd-tr", COMMANDS_TR, typeof URETILEN_TR !== "undefined" ? URETILEN_TR : null);
+  const ad = isEnLayout() ? "cmd-en-kisa" : "cmd-tr-kisa";
+  if (!_havuzlar[ad]) _havuzlar[ad] = havuz.filter((k) => k.length <= BALANCE.cmdMaxLen);
+  return _havuzlar[ad];
 }
 // Boss havuzunda uzunluk sınırı var: elle yazılmış bankada 53 karakterlik
 // komutlar vardı, hedef hızda yazması 15.1 sn — boss satırının ekranda kalma
