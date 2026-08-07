@@ -1304,7 +1304,9 @@ function softAyarTazele() {
   if (!softKbdGroup) return;
   const acik = softAktif();
   softKbdGroup.querySelectorAll("[data-soft]").forEach((b) => {
-    b.classList.toggle("active", (b.dataset.soft === "1") === acik);
+    const secili = (b.dataset.soft === "1") === acik;
+    b.classList.toggle("active", secili);
+    b.setAttribute("aria-pressed", secili ? "true" : "false");
   });
 }
 
@@ -1646,7 +1648,9 @@ if (drillTargetSel && typeof DRILL_TARGETS !== "undefined") {
 // Menüyü seçili moda göre giydir
 function applyModeUI() {
   document.querySelectorAll(".mode-btn").forEach((b) => {
-    b.classList.toggle("active", b.dataset.mode === gameMode);
+    const secili = b.dataset.mode === gameMode;
+    b.classList.toggle("active", secili);
+    b.setAttribute("aria-pressed", secili ? "true" : "false");
   });
   if (modeSubEl) {
     modeSubEl.textContent =

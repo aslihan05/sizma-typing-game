@@ -27,11 +27,15 @@ function applySettings() {
 
   // Buton aktiflik durumlarını güncelle
   themeBtns.forEach(btn => {
-    btn.classList.toggle("active", btn.dataset.theme === currentTheme);
+    const secili = btn.dataset.theme === currentTheme;
+    btn.classList.toggle("active", secili);
+    btn.setAttribute("aria-pressed", secili ? "true" : "false");
   });
 
   fontSizeBtns.forEach(btn => {
-    btn.classList.toggle("active", btn.dataset.size === currentFontSize);
+    const secili = btn.dataset.size === currentFontSize;
+    btn.classList.toggle("active", secili);
+    btn.setAttribute("aria-pressed", secili ? "true" : "false");
   });
   
   if (typeof window.updateMatrixColors === "function") {

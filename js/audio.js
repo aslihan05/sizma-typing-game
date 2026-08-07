@@ -119,6 +119,10 @@ function updateMuteBtn() {
   if (btn) {
     btn.textContent = muted ? "🔇" : "🔊";
     btn.title = muted ? "Sesi aç" : "Sesi kapat";
+    // Düğmenin tek içeriği bir emoji: ekran okuyucuya adı ve basılı durumu
+    // ayrıca söylenmeli, yoksa "hoparlör resmi" diye okunup geçiliyor.
+    btn.setAttribute("aria-label", btn.title);
+    btn.setAttribute("aria-pressed", muted ? "true" : "false");
   }
 }
 

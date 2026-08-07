@@ -32,9 +32,9 @@
     <header class="term-header">
       <span class="term-title">root@hedef:~#</span>
       <span class="term-header-controls">
-        <button class="pause-btn" id="muteBtn" title="Sesi kapat">🔊</button>
+        <button class="pause-btn" id="muteBtn" title="Sesi kapat" aria-label="Sesi kapat" aria-pressed="false">🔊</button>
         <button class="pause-btn hidden" id="finishBtn" title="Bitir ve raporu gör">■ bitir</button>
-        <button class="pause-btn hidden" id="pauseBtn" title="Duraklat (Esc)">⏸</button>
+        <button class="pause-btn hidden" id="pauseBtn" title="Duraklat (Esc)" aria-label="Duraklat">⏸</button>
         <span class="term-clock hidden" id="scoreClockContainer">
           <span id="comboDisplay" class="combo-text hidden"></span>
           <span id="score" class="score-text">skor: 0</span>
@@ -225,8 +225,11 @@
       <span class="input-text" id="inputText"></span>
     </div>
 
+    <!-- Durum satırı oyunun anlatıcısı: "tuzak! -3 sn", "ders bitti", depolama
+         uyarısı… Hepsi yalnızca göze hitap ediyordu. aria-live ile ekran
+         okuyucu bu değişiklikleri, oyuncunun odağını bozmadan duyurur. -->
     <footer class="term-status">
-      <span id="status">hazır</span>
+      <span id="status" role="status" aria-live="polite" aria-atomic="true">hazır</span>
     </footer>
 
   </section>
