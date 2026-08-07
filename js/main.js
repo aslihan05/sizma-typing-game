@@ -39,6 +39,20 @@ const COMMANDS_TR = [
   "vekili değiştir", "zinciri kır", "imzayı taklit et", "katmanı geç", "servisi durdur",
   "önbelleği boşalt", "görevi sonlandır", "işlemi gizle", "kütüğü değiştir",
   "parmak izini sil", "uydu bağlantısı kur", "veri akışını böl", "şifreyi yenile",
+  // Yeni eklenenler:
+  "veritabanını kopyala", "sistemi dondur", "truva atı gönder", "kalkanları indir",
+  "cihazı sıfırla", "ağ geçidini aç", "logları temizle", "kamerayı hackle", 
+  "bağlantıyı şifrele", "güvenlik kodunu kır", "veri merkezine sız", "sinyali takip et",
+  "sunucuyu yeniden başlat", "proxy ayarlarını değiştir", "ip adresini maskele",
+  "mac adresini klonla", "ddos saldırısı başlat", "botnet ağını etkinleştir",
+  "hedef portları tara", "güvenlik kalkanını test et", "virüs taramasını başlat",
+  "veri sızıntısını engelle", "güvenlik açığını bul", "yazılımı güncelle",
+  "kablosuz ağı kır", "şifreli mesajı çöz", "şifreli dosyayı aç",
+  "kötü amaçlı yazılımı sil", "ağ trafiğini analiz et", "siber saldırıyı durdur",
+  "veri tabanını onar", "erişim günlüğünü indir", "sistem yapılandırmasını al",
+  "izinsiz girişi tespit et", "yönetici panelini aç", "misafir erişimini kapat",
+  "kullanıcı hesabını kilitle", "yedek sunucuya geç", "acil durum protokolünü aç",
+  "bağlantı noktalarını kapat", "yapay zekayı devre dışı bırak", "siber güvenliği sağla"
 ];
 
 // Boss komut bankası (uzun, zor komutlar)
@@ -49,6 +63,25 @@ const BOSS_COMMANDS_TR = [
   "sistem günlüklerini temizle", "arka kapıyı yerleştir", "ağ trafiğini yönlendir",
   "çekirdek modülünü değiştir", "kimlik doğrulamayı atla", "yedek diski çöz",
   "izleme sistemini kandır", "ana anahtarı ele geçir", "protokolü yeniden yaz",
+  // Yeni eklenenler:
+  "merkezi güç kaynağını kes", "kripto kilitlerini kır", "kullanıcı veritabanını indir",
+  "yüksek güvenlik protokolünü atla", "otomatik savunma sistemini durdur",
+  "uydu şifreleme algoritmasını çöz", "ana sunucu bağlantısını sabote et",
+  "ana bilgisayar şifresini kırma işlemini başlat",
+  "kriptografik savunma hattını yarıp içeri sız",
+  "merkezi veri tabanındaki tüm kullanıcıları kopyala",
+  "ulusal ağ geçidi güvenlik kalkanını devre dışı bırak",
+  "sistem çekirdeğindeki kötü amaçlı kodları temizle",
+  "otomatik saldırı önleme mekanizmasını etkisizleştir",
+  "gizli hükümet protokolü iletişim hattını dinle",
+  "sunucu çiftliğindeki tüm yedekleme ünitelerini sil",
+  "çok katmanlı şifreleme algoritmasını çöz",
+  "şüpheli ağ aktivitelerinin kaynağını tespit et",
+  "global yönlendirme protokolü tablolarını değiştir",
+  "felaket kurtarma planı modüllerini aktif hale getir",
+  "karanlık ağ üzerinden güvenli bir bağlantı tüneli kur",
+  "hedef ağdaki tüm iletişim cihazlarını hackle",
+  "yapay zeka destekli savunma sistemini kandır"
 ];
 
 // EN düzeni seçilirse Türkçe karakter yazılamaz → ayrı İngilizce bank
@@ -59,6 +92,20 @@ const COMMANDS_EN = [
   "kill process", "hide the file", "mount drive", "flush cache", "spoof address",
   "inject payload", "escalate rights", "trace signal", "dump memory", "patch kernel",
   "sniff traffic", "forge token", "unlock vault", "reroute proxy", "wipe the disk",
+  // Yeni eklenenler:
+  "copy database", "freeze system", "send trojan", "lower shields", "reset device",
+  "open gateway", "clear logs", "hack camera", "encrypt connection", "crack security",
+  "infiltrate center", "follow the signal",
+  "reboot the server", "change proxy settings", "mask ip address",
+  "clone mac address", "launch ddos attack", "activate botnet swarm",
+  "scan target ports", "test security shield", "start virus scan",
+  "prevent data leak", "find security flaw", "update software now",
+  "crack wireless net", "decode hidden message", "open encrypted file",
+  "delete malware now", "analyze net traffic", "stop cyber attack",
+  "repair database now", "download access log", "get system config",
+  "detect intrusion now", "open admin panel", "close guest access",
+  "lock user account", "switch to backup", "start panic protocol",
+  "close open ports", "disable rogue ai", "ensure cyber safety"
 ];
 
 const BOSS_COMMANDS_EN = [
@@ -66,6 +113,25 @@ const BOSS_COMMANDS_EN = [
   "establish remote link", "find encryption key", "tear down the wall",
   "breach the main server", "escalate admin rights", "transfer hidden files",
   "purge the system logs", "plant a backdoor here", "reroute network traffic",
+  // Yeni eklenenler:
+  "cut central power supply", "break crypto locks", "download user database",
+  "bypass high security protocol", "stop automated defense system",
+  "decrypt satellite algorithm", "sabotage main server link",
+  "initiate mainframe password cracking sequence",
+  "breach the cryptographic defense perimeter",
+  "clone all users from the central database",
+  "disable the national gateway security shield",
+  "purge malicious code from the system core",
+  "neutralize automated intrusion prevention",
+  "eavesdrop on classified government comms",
+  "wipe all backup arrays in the server farm",
+  "solve multi layered encryption algorithm",
+  "pinpoint the source of suspicious activity",
+  "alter global routing protocol parameters",
+  "activate disaster recovery plan modules",
+  "establish secure tunnel via the dark web",
+  "hack all comm devices in the target grid",
+  "deceive artificial intelligence defenses"
 ];
 
 // Gürültü parçaları (bitişik, boşluksuz kırıntılar)
