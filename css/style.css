@@ -267,7 +267,7 @@ body {
 .term-title {
   color: var(--color-noise);
   font-size: calc(13px * var(--font-scale));
-  /* Yer daralınca kısalacak olan BU: "root@hedef:~#" dekoratif, saat ise
+  /* Yer daralınca kısalacak olan BU: "sizma@oyun:~#" dekoratif, saat ise
      oyunun can göstergesi. Kırpılmazsa skor/kombo/saat üçlüsünü ekran
      dışına itiyordu (dar telefonda kombo çıkar çıkmaz saat kayboluyordu). */
   min-width: 0;
