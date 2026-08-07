@@ -238,6 +238,28 @@ seçildi — tavan, belli bir uzunluktan sonra uzunluk farkını anlamsız kıla
 `DIFFICULTIES.lineHeight`, CSS'teki `.sentence` yüksekliğinden (18 px) küçük
 olamaz; yoksa satırlar üst üste biner.
 
+### Komut uzunluğunun üst sınırı — `BALANCE.bossMaxLen`
+
+Bir komut, satırın ekranda kaldığı süreden uzun sürede yazılıyorsa **hedef
+hızda yazan biri için bile yetişilmesi imkânsızdır.** Sınır buradan çıkar:
+
+```
+satır ömrü      = oyun alanı yüksekliği / (hız × bossSpeedMult)
+yazma süresi    = komut uzunluğu / difficulty.targetCps
+okuma payı      = satır ömrü − yazma süresi        ← pozitif kalmalı
+```
+
+Orta seviyede: 380 / (24 × 1.2) = **13.2 sn** satır ömrü. 40 karakteri hedef
+hızda (3.5 kps) yazmak 11.4 sn, yani okuma payı 1.8 sn. `bossMaxLen` bu yüzden
+40; 57 karakterlik bir komut 16.3 sn sürer ve satır ekranda kalmadan biter.
+
+Sınır **hem üretece hem elle yazılmış bankaya** uygulanır (bkz. `bossPool()`).
+
+> Ortalamaya değil **medyana** bakın. Üreteç ilk sürümde boss için yalnız sonek
+> kullanıyordu: ortalama 33'ten 35.6'ya çıkmış görünüyordu (zararsız), ama
+> dağılım 35'e sıkışmış ve kısa komut hiç kalmamıştı. Nefes payı tam da kısa
+> komutlardan gelir; medyan 28 → 35 olunca oyun yetişilmez hâle geldi.
+
 ## 8. Eğitim modu (`js/lessons.js`)
 
 Dersler **harf değil konum** tabanlıdır: "ev sırası" TR-Q'da `asdfg hjklş`,

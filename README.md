@@ -31,6 +31,11 @@ Zaman senin canın. Doğru komut süre kazandırır, kaçan komut ve tuzaklar s�
 | ⏱️ | Saatli bomba | Kendi geri sayımı var; kaçarsa büyük ceza, yazarsan 2× puan |
 | 🔥 | Boss | "Güvenlik Duvarı" — can barı, uzun komutlar, yoğun tuzak |
 
+Boss komutlarının bir uzunluk tavanı vardır (`BALANCE.bossMaxLen`). Tavan
+keyfî değil: satır ekranda ne kadar kalıyorsa, komutu hedef hızda yazmak
+ondan kısa sürmelidir — yoksa kusursuz oynayan biri için bile yetişilmesi
+imkânsız bir komut üretilmiş olur.
+
 Düşmanlar oyun ilerledikçe kademeli açılır.
 
 ## Modlar
@@ -259,7 +264,7 @@ Birkaç seçim bilinçli ve oyunun tamamını şekillendiriyor:
   yazmak *toplamalı* (bir komut yazarsın, +1 olur), kelime listesi *çarpımsal*
   (bir nesne +5, bir fiil +9 komut). `js/uretici.js` nesne + fiil çarpımından
   komut kuruyor; elle yazılmış banka yerine değil **yanına** ekleniyor, çünkü
-  oradakiler seçilmiş ve kurguya oturmuş komutlar. Havuz 130 → 1604 (TR).
+  oradakiler seçilmiş ve kurguya oturmuş komutlar. Havuz 130 → 2208 (TR).
   Nesneler belirtme hâliyle yazılı (`"çekirdeği"`): ünlü uyumu düzenli ama
   istisnalı, kural yazmak yerine çekilmiş hâli saklamak sıfır hata demek.
 
