@@ -154,6 +154,21 @@ de sınayabilirsin (sunucuyu durdurup sayfayı yenile). Gerçek alan adından
 servis edilen sürüm eskisi gibi önbellek-önceliklidir; **yayına çıkarken
 `sw.js` içindeki `SURUM` sabitini artır**, yoksa kullanıcı güncellemeyi görmez.
 
+### PDF dökümantasyonu
+
+`docs/SIZMA-Dokumantasyon.pdf`, bu README ile [docs/MIMARI.md](docs/MIMARI.md)'den
+**türetilir** — elle düzenlenmez. Döküman değişince yeniden üretin:
+
+```bash
+python tools/dokuman_uret.py
+```
+
+> Oyunun hâlâ hiçbir bağımlılığı yok; aşağıdakiler yalnızca bu araca ait ve
+> oyunu çalıştırmak için gerekmez:
+> `pip install reportlab markdown matplotlib`
+> (matplotlib sadece DejaVu fontları için — Türkçe karakterler ReportLab'in
+> gömülü fontunda yok.)
+
 ## Erişilebilirlik
 
 `prefers-reduced-motion` açıksa animasyonlar, matrix yağmuru ve sarsma/flash
@@ -197,6 +212,9 @@ js/audio.js          Web Audio ile sentetik terminal sesleri
 js/badges.js         rozet/başarım sistemi
 js/settings.js       tema, yazı boyutu, tam ekran
 js/main.js           oyun döngüsü, üretim, modlar, ekranlar
+docs/MIMARI.md       mimari ve geliştirici notları
+docs/SIZMA-Dokumantasyon.pdf   türetilmiş belge (bkz. PDF dökümantasyonu)
+tools/dokuman_uret.py          o belgeyi üreten betik
 ```
 
 Derleme adımı ve bağımlılık yok. Tek dış kaynak: Google Fonts üzerinden JetBrains Mono.
