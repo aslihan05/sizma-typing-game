@@ -253,7 +253,10 @@
 
 </main>
 
-<!-- Betikler: klavye → analiz → alıştırma → denge → ses → oyun -->
+<!-- Betikler: depolama ağı → klavye → analiz → alıştırma → denge → ses → oyun.
+     storage.js EN BAŞTA: sonraki dosyaların üst seviye localStorage okumaları
+     depolama engelliyken betiği öldürüyordu. -->
+  <script src="js/storage.js"></script>
   <script src="js/keyboard.js"></script>
   <script src="js/stats.js"></script>
   <script src="js/drills.js"></script>

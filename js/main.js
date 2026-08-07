@@ -1447,6 +1447,12 @@ function showMenu() {
   clearTyping();
   if (typeof highlightNextKey === "function") highlightNextKey(null);
   updateInputDisplay();
+  // Depolama engelliyse (bkz. js/storage.js) oyun bellek içi taklitle çalışır:
+  // her şey normal görünür ama sekme kapanınca ilerleme uçar. Sessizce yitirmek
+  // yerine söylenmeli — oyuncu isterse tarayıcı ayarını düzeltebilir.
+  if (window.SIZMA_DEPOLAMA_KALICI === false) {
+    statusEl.textContent = "uyarı: tarayıcı kaydetmeye izin vermiyor — ilerleme saklanmayacak";
+  }
   menuBestEl.textContent = getBest();
   if (levelBoxEl) levelBoxEl.innerHTML = renderLevelBar();
   const hintEl = document.getElementById("adaptHint");

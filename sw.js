@@ -6,7 +6,7 @@
 //
 // SÜRÜM: Dosyalardan biri değiştiğinde bu numarayı artırın. Eski önbellek
 // activate sırasında silinir; aksi halde kullanıcı güncellemeyi hiç görmez.
-const SURUM = "sizma-v9";
+const SURUM = "sizma-v10";
 
 // Geliştirme ortamı mı? Yerel sunucuda (python -m http.server, Live Server vb.)
 // önbellek-öncelikli davranış işi zorlaştırıyor; aşağıdaki fetch dalı buna bakar.
@@ -25,6 +25,7 @@ const DOSYALAR = [
   "./index.html",
   "./manifest.json",
   "./css/style.css",
+  "./js/storage.js",
   "./js/keyboard.js",
   "./js/stats.js",
   "./js/drills.js",
