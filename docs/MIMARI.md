@@ -175,8 +175,29 @@ diziyi görsün.
 
 **Dışa/içe aktarma** (`exportData()` / `importData()`) şunları taşır:
 `stats`, `history`, `leaderboard`, `badges`, `lessons`. Tercihler ve komut
-torbaları taşınmaz — cihaza özgüdürler. `importData()` eksik alanlara toleranslıdır:
-eski bir yedek dosyasında `lessons` yoksa mevcut ders ilerlemesi korunur.
+torbaları taşınmaz — cihaza özgüdürler.
+
+`importData()` iki ayrı şeyi birden yapar, ikisini karıştırmayın:
+
+- **Eksik alana toleranslıdır.** Eski bir yedekte `lessons` yoksa mevcut ders
+  ilerlemesi korunur, hata verilmez.
+- **Yanlış şekle toleranslı DEĞİLDİR.** Her alan tek tek doğrulanır
+  (`history`/`leaderboard` → `Array.isArray`, `stats`/`badges`/`lessons` →
+  düz nesne). Şekli tutmayan alan **yazılmaz**, tutan alanlar yüklenir.
+  Hiçbir alan tanınmazsa `false` döner ve arayüz "dosya hatalı" der.
+
+> **Yeni bir alan eklerken doğrulama satırını yazmayı atlamayın.** Bu koruma
+> kozmetik değil: dosya kullanıcıdan geliyor (yarım inmiş, elle düzenlenmiş ya
+> da yanlışlıkla seçilmiş başka bir `.json`) ve doğrulama yokken geçerli ama
+> yanlış türde tek bir alan oyunu KALICI olarak kırıyordu — `statsEndGame`
+> içinde `hist.unshift` patlıyor, `endGame` yarıda kesiliyor, sonuç ekranı hiç
+> açılmıyordu. Veri depoda kaldığı için her oyunda tekrar ediyor, tek çıkış
+> yolu "verileri sıfırla" oluyordu.
+
+Aynı kural yükleyiciler için de geçerli: **`load*` fonksiyonları depodaki veri
+beklenen şekilde değilse boş başlangıca dönmelidir.** `JSON.parse`'ı `try/catch`
+içine almak yetmez — geçerli ama yanlış türde bir JSON (`"metin"`, `42`)
+sessizce geçer ve kullanıldığı yerde patlar.
 
 > `localStorage` **origin** başına ayrılır (protokol + host + port). Oyunu
 > `127.0.0.1:5500` yerine `localhost:5500` üzerinden açmak, tarayıcı için

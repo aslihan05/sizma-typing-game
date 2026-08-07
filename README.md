@@ -15,10 +15,11 @@ Zaman senin canın. Doğru komut süre kazandırır, kaçan komut ve tuzaklar s�
 - **Yanlış harfin cezası yoktur** — sadece ilerlemez. Amaç panik değil, doğru refleks.
 - **Seri (combo)** — art arda komut tamamladıkça puan çarpanı büyür. 3'te seri
   göstergesi belirir (çarpanın devreye girdiği yer), 5'te terminal
-  **Overdrive**'a geçip temanın vurgu rengine döner. Seriyi bozan şeyler:
-  tuzağa düşmek, komut kaçırmak, bomba patlaması/kaçması — **yanlış harf
-  bozmaz.** Overdrive boss sırasında kapanır ve Pratik / Parmak / Eğitim
-  modlarında hiç çıkmaz (skorun ödülü olduğu için).
+  **Overdrive**'a geçer: yazılar temanın vurgu rengine, arka plan lacivere
+  döner ve ekran kenarı mavi parlar. Seriyi bozan şeyler: tuzağa düşmek,
+  komut kaçırmak, bomba patlaması/kaçması — **yanlış harf bozmaz.**
+  Overdrive boss sırasında kapanır ve Pratik / Parmak / Eğitim modlarında
+  hiç çıkmaz (skorun ödülü olduğu için).
 
 ### Düşmanlar
 
@@ -159,6 +160,17 @@ servis edilen sürüm eskisi gibi önbellek-önceliklidir; **yayına çıkarken
 efektleri devre dışı kalır; işlevsel renkler korunur. Ayarlardan tema
 (Hacker / Synthwave / Cyberpunk / Karanlık), yazı boyutu ve tam ekran seçilebilir.
 
+Ekran okuyucu tarafında: durum satırı `aria-live` ile duyurulur (oyunun
+anlatıcısı orası — "tuzak! -3 sn", "ders bitti", depolama uyarısı), yalnızca
+emoji içeren düğmeler `aria-label` taşır, ses düğmesi ile seçim grupları
+(mod, tema, yazı boyutu, ekran klavyesi) `aria-pressed` ile hangi seçeneğin
+seçili olduğunu bildirir.
+
+> Dürüst sınır: **oyunun kendisi** ekran okuyucuyla oynanamaz. İnen yazıları
+> gözle yakalayıp süreye karşı yazmak buna elverişli değil ve bunu değiştirmeye
+> çalışmak oyunu başka bir şeye dönüştürür. Yapılan iş, oyun dışındaki her şeyin
+> — menü, ayarlar, analiz paneli, ders listesi — gezilebilir olması.
+
 ## Klavye
 
 | Tuş | İşlev |
@@ -204,6 +216,11 @@ Birkaç seçim bilinçli ve oyunun tamamını şekillendiriyor:
   istenen şey doğru refleks. Yanlış harf sadece ilerletmez.
 - **Zaman = can.** Ayrı can barı yok. Tek kaynak olması hem anlatıyı hem dengeyi
   sadeleştiriyor: her ödül ve ceza aynı para biriminden ödeniyor.
+- **Baskısız modlarda skor hiç gösterilmez.** Pratik, Parmak ve Eğitim'de ceza
+  ve süre yok; skor orada yalnızca "ne kadar oynadığını" ölçerdi. Hem oyun
+  sırasında başlıkta hem sonuç ekranında gizlenir — ders ortasında öğrenciye
+  anlamsız bir sayı göstermemek için. Saat kalır: yukarı sayar ve kendi hızını
+  görmen içindir.
 - **XP doğrudan doğru yazılan karakter sayısı.** Ayrı bir puan sayacı tutulmuyor,
   yani zorluk seçimiyle veya comboyla şişirilemez. "Verileri sıfırla" dendiğinde
   seviye de dürüstçe sıfırlanır.
