@@ -158,9 +158,34 @@ const MARKERS = [["[","]"], ["$","$"], ["(",")"], ["<",">"], ["{","}"]];
 let currentLayout = "TR-Q";
 function isEnLayout() { return currentLayout === "EN"; }
 
-// Düzenin diline göre doğru bankayı ver
-function cmdPool()  { return isEnLayout() ? COMMANDS_EN : COMMANDS_TR; }
-function bossPool() { return isEnLayout() ? BOSS_COMMANDS_EN : BOSS_COMMANDS_TR; }
+// Düzenin diline göre doğru bankayı ver.
+//
+// Elle yazılmış banka + js/uretici.js'in ürettikleri birleştirilir: elle
+// yazılanlar seçilmiş, kurguya oturmuş komutlar, üretilenler hacmi doldurur.
+// Üreteç yoksa (dosya yüklenmediyse) oyun eski hâliyle çalışmaya devam eder.
+//
+// Birleştirme bir kez yapılıp saklanır — cmdPool her komut çekiminde
+// çağrılıyor, her seferinde yüzlerce elemanlı diziyi birleştirmek israf olur.
+const _havuzlar = {};
+function birlesikHavuz(ad, elle, uretilen) {
+  if (!_havuzlar[ad]) {
+    _havuzlar[ad] = Array.isArray(uretilen)
+      ? Array.from(new Set(elle.concat(uretilen)))   // tekrarları ele
+      : elle;
+  }
+  return _havuzlar[ad];
+}
+
+function cmdPool() {
+  return isEnLayout()
+    ? birlesikHavuz("cmd-en", COMMANDS_EN, typeof URETILEN_EN !== "undefined" ? URETILEN_EN : null)
+    : birlesikHavuz("cmd-tr", COMMANDS_TR, typeof URETILEN_TR !== "undefined" ? URETILEN_TR : null);
+}
+function bossPool() {
+  return isEnLayout()
+    ? birlesikHavuz("boss-en", BOSS_COMMANDS_EN, typeof URETILEN_BOSS_EN !== "undefined" ? URETILEN_BOSS_EN : null)
+    : birlesikHavuz("boss-tr", BOSS_COMMANDS_TR, typeof URETILEN_BOSS_TR !== "undefined" ? URETILEN_BOSS_TR : null);
+}
 function noisePool(){ return isEnLayout() ? NOISE_EN : NOISE_TR; }
 
 // Bir diziden rastgele eleman seç
